@@ -101,34 +101,31 @@ void setup() {
 
 void loop() {
    
-  now = rtc.now();             
-    String strInfo = now.day() > 9 ? String(now.day()) : "0"+String(now.day());
-    strInfo += "/";
-    strInfo += now.month() > 9 ? String(now.month()) : "0"+String(now.month());
-    strInfo += "/";
-    strInfo += String(now.year());
-    strInfo += " ";
-    strInfo += now.hour() > 9 ? String(now.hour()) : "0"+String(now.hour());
-    strInfo += ":";
-    strInfo += now.minute() > 9 ? String(now.minute()) : "0"+String(now.minute());
   
+  statusButtonMod = digitalRead(BUTTON_MOD);
+  statusButtonSet = digitalRead(BUTTON_SET);
+
+  setStatusModal();      
+  
+
+  if(currentModalState < MODAL_RUN){
     
-  strInfo += " - startTimeP1: ";
-  
-  strInfo += startTimeP1.hour() > 9 ? String(startTimeP1.hour()) : "0"+String(startTimeP1.hour());
-  strInfo += ":";
-    strInfo += startTimeP1.minute() > 9 ? String(startTimeP1.minute()) : "0"+String(startTimeP1.minute());
-  
-  strInfo += " - startTimeP2: ";
-  
-  strInfo += startTimeP2.hour() > 9 ? String(startTimeP2.hour()) : "0"+String(startTimeP2.hour());
-  strInfo += ":";
-    strInfo += startTimeP2.minute() > 9 ? String(startTimeP2.minute()) : "0"+String(startTimeP2.minute());
-  
-  Serial.println(strInfo);
-  
-  delay(3000);
-  
+    digitalWrite(LED_GREEN, HIGH);
+    showSettingParams();   
+    
+    
+  }else{
+
+    digitalClockDisplay();
+    //lcd.setCursor(0, 1);    
+    //lcd.print("          ");      
+    digitalWrite(LED_GREEN, LOW);
+    
+    receiveRfSignal();    
+    ctrlIrrigationStatus();
+    setIrrigation();
+
+  }
 
 }
 
