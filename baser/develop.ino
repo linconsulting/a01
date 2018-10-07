@@ -58,8 +58,8 @@ byte previousModalState = 0;
 
 DateTime now = 0;
 uint32_t unixNow;
-DateTime startTimeP1;
-DateTime startTimeP2;
+DateTime startTimeP1 = 0;
+DateTime startTimeP2 = 0;
 DateTime lastExecution = 0;
 DateTime nextExecution = 0;
 byte durationP1 = 0;
