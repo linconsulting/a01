@@ -7,6 +7,9 @@ RCSwitch rfReceiver = RCSwitch();
 
 RTC_DS3231 rtc;
 LiquidCrystal_I2C lcd(0x27, 16, 2); // set the LCD address to 0x27 for a 16 chars and 2 line display
+
+#define DEBUG 1
+
 #define DS3231_ADDRESS 0x68    // RTC is connected, address is Hex68 (Decimal 104)
 
 #define BUTTON_SET 8
@@ -67,6 +70,7 @@ byte durationP2 = 0;
 byte durationShowNext = 15;
 byte freqP1 = 0;
 byte freqP2 = 0;
+byte p1Enabled = 0;
 byte p2Enabled = 0;
 byte setOnlyProg = 0;
 
@@ -92,10 +96,17 @@ void setup() {
   currentModalState = MODAL_RUN;
   previousModalState = MODAL_DEFAULT_PREV_STATUS;
   
-  Serial.begin(9600);  
+  #ifdef DEBUG
+    Serial.begin(9600);  
+  #endif
+  
   rfReceiver.enableReceive(RF_RECEIVER);  
   now = rtc.now();         
   nextExecution = now + TimeSpan(durationShowNext);
+
+  #ifdef DEBUG
+        outVars();
+  #endif
 
 }
 
@@ -126,8 +137,9 @@ void loop() {
 
   }
       
-    outVars();
-
+    //#ifdef DEBUG
+    //    outVars();
+    //#endif
   
 
 }
@@ -158,22 +170,10 @@ void outVars(){
     strVars += startTimeP1.hour() > 9 ? String(startTimeP1.hour()) : "0"+String(startTimeP1.hour());
     strVars += ":";
     strVars += startTimeP1.minute() > 9 ? String(startTimeP1.minute()) : "0"+String(startTimeP1.minute());
-
-    
-  
-    // strVars = "-startTimeP2 = ";
-    // Serial.print(strVars);
-
-    // strVars += startTimeP2.day() > 9 ? String(startTimeP2.day()) : "0"+String(startTimeP2.day()) + "/";
-    // strVars += startTimeP2.month() > 9 ? String(startTimeP2.month()) : "0"+String(startTimeP2.month()) + "/";
-    // strVars += String(startTimeP2.year()) + " ";  
-    // strVars += startTimeP2.hour() > 9 ? String(startTimeP2.hour()) : "0"+String(startTimeP2.hour());
-    // strVars += ":";
-    // strVars += startTimeP2.minute() > 9 ? String(startTimeP2.minute()) : "0"+String(startTimeP2.minute());
     
     Serial.println(strVars);
 
-    delay(500);
+    //delay(500);
   
     
 
@@ -239,23 +239,27 @@ void ctrlIrrigationStatus(){
 
     unixNow = now.unixtime();
 
-    if(currentModalState >= MODAL_RUN && unixNow >= startTimeP1.unixtime() && soilStatus == VAL_DRY){
-        currentModalState = MODAL_IRRIG_ON_P1;
+    if(currentModalState >= MODAL_RUN && p1Enabled && unixNow >= startTimeP1.unixtime() && soilStatus == VAL_DRY){
+        currentModalState = MODAL_IRRIG_ON_P1; //ATTIVA P1
     }
 
-    if(currentModalState == MODAL_IRRIG_ON_P1 && unixNow >= (startTimeP1.unixtime() + (durationP1*60))){
+    if(currentModalState == MODAL_IRRIG_ON_P1 && unixNow >= (startTimeP1.unixtime() + (durationP1*60UL))){
         currentModalState = MODAL_RUN;
-        startTimeP1 = startTimeP1 + TimeSpan(freqP1*3600L);
+
+        startTimeP1 = startTimeP1 + TimeSpan(freqP1*3600UL);
+        #ifdef DEBUG
+            outVars();
+        #endif
         lastExecution = now;
     }
 
     if(currentModalState >= MODAL_RUN && p2Enabled == 1 && unixNow >= startTimeP2.unixtime() && soilStatus == VAL_DRY){
-        currentModalState = MODAL_IRRIG_ON_P2;
+        currentModalState = MODAL_IRRIG_ON_P2; //ATTIVA P2
     }
 
-    if(p2Enabled == 1 && currentModalState == MODAL_IRRIG_ON_P2 && unixNow >= (startTimeP2.unixtime() + (durationP2*60))){
+    if(p2Enabled == 1 && currentModalState == MODAL_IRRIG_ON_P2 && unixNow >= (startTimeP2.unixtime() + (durationP2*60UL))){
         currentModalState = MODAL_RUN;
-        startTimeP2 = startTimeP2 + TimeSpan(freqP2*3600L);
+        startTimeP2 = startTimeP2 + TimeSpan(freqP2*3600UL);
         lastExecution = now;
     }
 
@@ -381,6 +385,7 @@ void setStatusModal(){
         case MODAL_START_P1_MM:
 
             startTimeP1 = DateTime(newYY, newMO, newDD, newHH, newMM, newSS);
+            p1Enabled = 1;
             newYY = startTimeP1.year() - 1;
             newMO = startTimeP1.month() - 1;
             newDD = startTimeP1.day() - 1;
@@ -499,6 +504,7 @@ void setStatusModal(){
             durationP2 = 0;
             freqP1 = 0;
             freqP2 = 0;
+            p1Enabled = 0;
             p2Enabled = 0;
             setOnlyProg = 0;
     }
@@ -683,18 +689,21 @@ void receiveGenericRfSignal(){
     
         int value = rfReceiver.getReceivedValue();
         
-        if (value == 0) {
-            Serial.print("Unknown encoding");
-        } else {
-            Serial.print("Received ");
-            Serial.print( rfReceiver.getReceivedValue() );
-            Serial.print(" / ");
-            Serial.print( rfReceiver.getReceivedBitlength() );
-            Serial.print("bit ");
-            Serial.print("Protocol: ");
-            Serial.println( rfReceiver.getReceivedProtocol() );
-        }        
+        #ifdef DEBUG
 
+            if (value == 0) {
+                Serial.print("Unknown encoding");
+            } else {
+                Serial.print("Received ");
+                Serial.print( rfReceiver.getReceivedValue() );
+                Serial.print(" / ");
+                Serial.print( rfReceiver.getReceivedBitlength() );
+                Serial.print("bit ");
+                Serial.print("Protocol: ");
+                Serial.println( rfReceiver.getReceivedProtocol() );
+            }        
+
+        #endif
         rfReceiver.resetAvailable();
   }
 
@@ -708,32 +717,42 @@ void receiveRfSignal(){
         int value = rfReceiver.getReceivedValue();
         
         if (value == 0) {
-            Serial.print("Unknown encoding");
+            #ifdef DEBUG
+                Serial.print("Unknown encoding");
+            #endif                
             soilStatus = VAL_DRY;
 
         } else {
-            Serial.print("Received ");
-            Serial.print( rfReceiver.getReceivedValue() );
-            Serial.print(" / ");
-            Serial.print( rfReceiver.getReceivedBitlength() );
-            Serial.print("bit ");
-            Serial.print("Protocol: ");
-            Serial.println( rfReceiver.getReceivedProtocol() );
+            #ifdef DEBUG
+                Serial.print("Received ");
+                Serial.print( rfReceiver.getReceivedValue() );
+                Serial.print(" / ");
+                Serial.print( rfReceiver.getReceivedBitlength() );
+                Serial.print("bit ");
+                Serial.print("Protocol: ");
+                Serial.println( rfReceiver.getReceivedProtocol() );
+            #endif
         }
 
         value = map(rfReceiver.getReceivedValue(),VAL_WET_TRIGGER,VAL_MAX_WET,0,100);
 
-        Serial.print("umidita_percent: ");
-        Serial.print(value);
+        #ifdef DEBUG
+            Serial.print("umidita_percent: ");
+            Serial.print(value);
+        #endif
 
         if (value <= VAL_DRY){
             
-            Serial.println(" Terreno asciutto");
+            #ifdef DEBUG
+                Serial.println(" Terreno asciutto");
+            #endif
             soilStatus = VAL_DRY;
         }
 
         if (value >= VAL_WET){
-            Serial.println(" Terreno umido");
+            #ifdef DEBUG
+                Serial.println(" Terreno umido");
+            #endif
             soilStatus = VAL_WET;
         }
 
@@ -750,17 +769,19 @@ void setIrrigation(){
 
     if(currentModalState <= MODAL_RUN && previousModalState != MODAL_DEFAULT_PREV_STATUS && currentModalState != previousModalState){
                 
-        strInfo = now.day() > 9 ? String(now.day()) : "0"+String(now.day());
-        strInfo += "/";
-        strInfo += now.month() > 9 ? String(now.month()) : "0"+String(now.month());
-        strInfo += "/";
-        strInfo += String(now.year());
-        strInfo += " ";
-        strInfo += now.hour() > 9 ? String(now.hour()) : "0"+String(now.hour());
-        strInfo += ":";
-        strInfo += now.minute() > 9 ? String(now.minute()) : "0"+String(now.minute());              
-        strInfo += " Eletrov. SPENTA";
-        Serial.println(strInfo);
+        #ifdef DEBUG
+            strInfo = now.day() > 9 ? String(now.day()) : "0"+String(now.day());
+            strInfo += "/";
+            strInfo += now.month() > 9 ? String(now.month()) : "0"+String(now.month());
+            strInfo += "/";
+            strInfo += String(now.year());
+            strInfo += " ";
+            strInfo += now.hour() > 9 ? String(now.hour()) : "0"+String(now.hour());
+            strInfo += ":";
+            strInfo += now.minute() > 9 ? String(now.minute()) : "0"+String(now.minute());              
+            strInfo += " Eletrov. SPENTA";
+            Serial.println(strInfo);
+        #endif
 
         digitalWrite(RELAIS_EV_STOP, HIGH);        
         delay(VAL_IMPULSO_EV);
@@ -772,17 +793,19 @@ void setIrrigation(){
     if((currentModalState == MODAL_IRRIG_ON_P1 || currentModalState == MODAL_IRRIG_ON_P2) && currentModalState != previousModalState){
         
         
-        strInfo = now.day() > 9 ? String(now.day()) : "0"+String(now.day());
-        strInfo += "/";
-        strInfo += now.month() > 9 ? String(now.month()) : "0"+String(now.month());
-        strInfo += "/";
-        strInfo += String(now.year());
-        strInfo += " ";
-        strInfo += now.hour() > 9 ? String(now.hour()) : "0"+String(now.hour());
-        strInfo += ":";
-        strInfo += now.minute() > 9 ? String(now.minute()) : "0"+String(now.minute());              
-        strInfo += " Eletrov. ACCESA";
-        Serial.println(strInfo);
+        #ifdef DEBUG
+            strInfo = now.day() > 9 ? String(now.day()) : "0"+String(now.day());
+            strInfo += "/";
+            strInfo += now.month() > 9 ? String(now.month()) : "0"+String(now.month());
+            strInfo += "/";
+            strInfo += String(now.year());
+            strInfo += " ";
+            strInfo += now.hour() > 9 ? String(now.hour()) : "0"+String(now.hour());
+            strInfo += ":";
+            strInfo += now.minute() > 9 ? String(now.minute()) : "0"+String(now.minute());              
+            strInfo += " Eletrov. ACCESA";
+            Serial.println(strInfo);
+        #endif
 
         digitalWrite(RELAIS_EV_START, HIGH);        
         delay(VAL_IMPULSO_EV);
