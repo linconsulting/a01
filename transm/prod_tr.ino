@@ -13,14 +13,14 @@ int moistVal= 0;
 int lastMoistVal= 0;
 
 void setup() {
-  Serial.begin(9600);
+  //Serial.begin(9600);
   rfTransmitter.enableTransmit(RF_TRANSMITTER);  
 }
 
 void loop() {
 
   moistVal = analogRead(SENS_SOIL_MOIST);
-  Serial.println(moistVal);
+  //Serial.println(moistVal);
 
   if(moistVal > 0 && moistVal != lastMoistVal){
 
@@ -28,5 +28,5 @@ void loop() {
     lastMoistVal = moistVal;
   }
   
-  delay(10000);  
+  delay(43200000UL);//12 ore  
 }
