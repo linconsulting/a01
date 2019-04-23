@@ -13,7 +13,6 @@ LiquidCrystal_I2C lcd(0x27, 16, 2); // set the LCD address to 0x27 for a 16 char
 #define BUTTON_MOD 7
 #define RELAIS_EV_START 9
 #define RELAIS_EV_STOP 10
-#define LED_GREEN 6
 #define BLINK_INT_MODAL_UPD 500
 #define MODAL_RUN 100
 #define MODAL_IRRIG_ON_P1 110 
@@ -55,6 +54,7 @@ int  statusButtonMod = 0;
 int  statusButtonSet = 0;
 byte currentModalState = 0;
 byte previousModalState = 0;
+byte lcdStatus = 0;
 
 DateTime now = 0;
 uint32_t unixNow;
@@ -70,7 +70,7 @@ byte freqP2 = 0;
 byte p2Enabled = 0;
 byte setOnlyProg = 0;
 
-int newYY = 2017;
+int newYY = 2018;
 int newMO = 0;
 int newDD = 0;
 int newHH = 0;
@@ -83,11 +83,10 @@ byte soilStatus = 0;
 void setup() {
 
   pinMode(BUTTON_MOD, INPUT);  
-  pinMode(BUTTON_SET, INPUT);  
-  pinMode(LED_GREEN, OUTPUT);    
+  pinMode(BUTTON_SET, INPUT);    
   pinMode(RELAIS_EV_START, OUTPUT);
   pinMode(RELAIS_EV_STOP, OUTPUT);
-  lcdSetup();
+  lcdOn();
   rtcSetup();
   currentModalState = MODAL_RUN;
   previousModalState = MODAL_DEFAULT_PREV_STATUS;
@@ -110,16 +109,23 @@ void loop() {
 
   if(currentModalState < MODAL_RUN){
     
-    digitalWrite(LED_GREEN, HIGH);
     showSettingParams();   
     
     
   }else{
 
-    digitalClockDisplay();
-    //lcd.setCursor(0, 1);    
-    //lcd.print("          ");      
-    digitalWrite(LED_GREEN, LOW);
+    if(statusButtonSet == HIGH){
+        if(lcdStatus == 1){
+            lcdOff();
+        }else{
+            lcdOn();
+        }
+        delay(2500);
+    }
+    
+    if(lcdStatus == 1){
+        digitalClockDisplay();    
+    }
     
     receiveRfSignal();    
     ctrlIrrigationStatus();
@@ -195,7 +201,7 @@ void ctrlIrrigationStatus(){
 
     if(currentModalState == MODAL_IRRIG_ON_P1 && unixNow >= (startTimeP1.unixtime() + (durationP1*60))){
         currentModalState = MODAL_RUN;
-        startTimeP1 = startTimeP1 + TimeSpan(freqP1*3600L);
+        startTimeP1 = startTimeP1 + TimeSpan(freqP1*3600UL);
         lastExecution = now;
     }
 
@@ -205,7 +211,7 @@ void ctrlIrrigationStatus(){
 
     if(p2Enabled == 1 && currentModalState == MODAL_IRRIG_ON_P2 && unixNow >= (startTimeP2.unixtime() + (durationP2*60))){
         currentModalState = MODAL_RUN;
-        startTimeP2 = startTimeP2 + TimeSpan(freqP2*3600L);
+        startTimeP2 = startTimeP2 + TimeSpan(freqP2*3600UL);
         lastExecution = now;
     }
 
@@ -245,9 +251,17 @@ void rtcSetup(){
   }
 }
 
-void lcdSetup(){
+void lcdOn(){
   lcd.init();
   lcd.backlight();
+  lcdStatus = 1;
+
+}
+
+void lcdOff(){
+  lcd.init();
+  lcd.noBacklight();
+  lcdStatus = 0;
 
 }
 
@@ -485,7 +499,7 @@ void switchtoModalStartP1(){
     lcd.print("P1 START YEAR        ");             
     lcd.setCursor(0, 1);
     lcd.print("                ");                                     
-    newYY = 2017 - 1;
+    newYY = 2018 - 1;
     newMO = 0;
     newDD = 0;
     newHH = 0;
