@@ -120,9 +120,11 @@ void loop() {
         }else{
             lcdOn();
         }
-        delay(2500);
+        delay(2000);
     }
-    
+
+    now = rtc.now();
+        
     if(lcdStatus == 1){
         digitalClockDisplay();    
     }
@@ -138,7 +140,7 @@ void loop() {
 
 void digitalClockDisplay(){
 
-    now = rtc.now();             
+                 
     String strInfo = now.day() > 9 ? String(now.day()) : "0"+String(now.day());
     strInfo += "/";
     strInfo += now.month() > 9 ? String(now.month()) : "0"+String(now.month());
@@ -155,21 +157,21 @@ void digitalClockDisplay(){
 
     if((currentModalState == MODAL_IRRIG_ON_P1 || currentModalState == MODAL_IRRIG_ON_P2)){
 
-        strInfo += " - LE ";        
+        strInfo += " - UE ";        
         strInfo += now.hour() > 9 ? String(now.hour()) : "0"+String(now.hour());
         strInfo += ":";
         strInfo += now.minute() > 9 ? String(now.minute()) : "0"+String(now.minute());
 
     }else if(now.unixtime() < nextExecution.unixtime()){
 
-        strInfo += " - LE ";        
+        strInfo += " - UE ";        
         strInfo += lastExecution.hour() > 9 ? String(lastExecution.hour()) : "0"+String(lastExecution.hour());
         strInfo += ":";
         strInfo += lastExecution.minute() > 9 ? String(lastExecution.minute()) : "0"+String(lastExecution.minute());
 
     }else{
 
-        strInfo += " - NE ";
+        strInfo += " - PE ";
 
         if( startTimeP2.unixtime() == 0 || (startTimeP1.unixtime() < startTimeP2.unixtime())){
             strInfo += startTimeP1.hour() > 9 ? String(startTimeP1.hour()) : "0"+String(startTimeP1.hour());
