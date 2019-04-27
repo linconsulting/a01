@@ -38,7 +38,13 @@ LiquidCrystal_I2C lcd(0x27, 16, 2); // set the LCD address to 0x27 for a 16 char
 #define MODAL_FREQ_P1_HH 19
 #define MODAL_FREQ_P2_HH 20
 #define MODAL_P2_ENABLED 21
-#define MODAL_SET_ONLY_PROG 22
+
+
+#define MODAL_MENU_ENTER 30
+#define MODAL_MENU_CLOCK 32
+#define MODAL_MENU_PROGR 34
+#define MODAL_MENU_PROGR_SKIP 36
+#define MODAL_MENU_EXIT 40
 
 
 #define RF_RECEIVER 0  // Receiver on interrupt 0 => that is pin #2
@@ -55,6 +61,8 @@ int  statusButtonSet = 0;
 byte currentModalState = 0;
 byte previousModalState = 0;
 byte lcdStatus = 0;
+byte switchModalMenu = 0;
+byte numSkip = 0;
 
 DateTime now = 0;
 uint32_t unixNow;
@@ -104,12 +112,12 @@ void loop() {
   statusButtonMod = digitalRead(BUTTON_MOD);
   statusButtonSet = digitalRead(BUTTON_SET);
 
-  setStatusModal();      
+  setStatusModal();      //QUANDO SI PREME IL BOTTONE MOD
   
 
   if(currentModalState < MODAL_RUN){
     
-    showSettingParams();   
+    showSettingParams();   //QUANDO SI PREME IL BOTTONE SET
     
     
   }else{
@@ -198,7 +206,14 @@ void ctrlIrrigationStatus(){
     unixNow = now.unixtime();
 
     if(currentModalState >= MODAL_RUN && unixNow >= startTimeP1.unixtime() && soilStatus == VAL_DRY){
-        currentModalState = MODAL_IRRIG_ON_P1;
+
+        if(numSkip > 0){
+            numSkip--;
+            startTimeP1 = startTimeP1 + TimeSpan(freqP1*3600UL);    
+        }else{
+            currentModalState = MODAL_IRRIG_ON_P1;
+        }
+        
     }
 
     if(currentModalState == MODAL_IRRIG_ON_P1 && unixNow >= (startTimeP1.unixtime() + (durationP1*60))){
@@ -208,7 +223,14 @@ void ctrlIrrigationStatus(){
     }
 
     if(currentModalState >= MODAL_RUN && p2Enabled == 1 && unixNow >= startTimeP2.unixtime() && soilStatus == VAL_DRY){
-        currentModalState = MODAL_IRRIG_ON_P2;
+        
+        if(numSkip > 0){
+            numSkip--;
+            startTimeP2 = startTimeP2 + TimeSpan(freqP2*3600UL);
+        }else{
+            currentModalState = MODAL_IRRIG_ON_P2;
+        }
+
     }
 
     if(p2Enabled == 1 && currentModalState == MODAL_IRRIG_ON_P2 && unixNow >= (startTimeP2.unixtime() + (durationP2*60))){
@@ -268,21 +290,66 @@ void lcdOff(){
 }
 
 void setStatusModal(){
-
   
   if(statusButtonMod == HIGH){
 
     switch (currentModalState) {
 
-        case MODAL_SET_ONLY_PROG:
-            if(setOnlyProg == 0){
-                switchToModalUpdYY();
+        case MODAL_MENU_ENTER:
+
+                switch (switchModalMenu)
+                {
+                    case MODAL_MENU_CLOCK:
+                        switchModalMenu = 0;                        
+                        durationP1 = 0;
+                        durationP2 = 0;
+                        freqP1 = 0;
+                        freqP2 = 0;
+                        p2Enabled = 0;
+                        setOnlyProg = 0;
+                        numSkip = 0;
+                        switchToModalUpdYY();
+                        break;
+
+                    case MODAL_MENU_PROGR:
+                        switchModalMenu = 0;                        
+                        durationP1 = 0;
+                        durationP2 = 0;
+                        freqP1 = 0;
+                        freqP2 = 0;
+                        p2Enabled = 0;
+                        setOnlyProg = 0;
+                        numSkip = 0;
+                        switchtoModalStartP1();      
+                        break;
+
+                    case MODAL_MENU_PROGR_SKIP:
+                        switchModalMenu = 0;
+                        switchtoModalSkip();      
+                        break;
+
+                    case MODAL_MENU_EXIT:
+                        currentModalState = MODAL_RUN;
+                        switchModalMenu = 0;
+                        break;
                 
-            }else{
-                switchtoModalStartP1();      
-            }            
-                        
+                    default:
+                        currentModalState = MODAL_RUN;
+                        switchModalMenu = 0;
+                        break;
+                }
+
+
         break;
+
+        case MODAL_MENU_PROGR_SKIP:
+            currentModalState = MODAL_RUN;     
+            lcd.setCursor(0, 0);
+            lcd.print("                ");             
+            lcd.setCursor(0, 1);
+            lcd.print("                ");
+        break;
+        
         case MODAL_UPD_YY:
             currentModalState = MODAL_UPD_MO;  
             lcd.setCursor(0, 0);
@@ -455,18 +522,14 @@ void setStatusModal(){
         break;
         default:
             
-            currentModalState = MODAL_SET_ONLY_PROG;            
+            currentModalState = MODAL_MENU_ENTER;
+            switchModalMenu = MODAL_MENU_CLOCK;
             lcd.setCursor(0, 0);
-            lcd.print("SET ONLY PROG?  ");             
+            //lcd.print("SET ONLY PROG?  ");             
+            lcd.print("IMPOSTA         ");
             lcd.setCursor(0, 1);
             lcd.print("                ");
-
-            durationP1 = 0;
-            durationP2 = 0;
-            freqP1 = 0;
-            freqP2 = 0;
-            p2Enabled = 0;
-            setOnlyProg = 0;
+            
     }
 
     delay(BLINK_INT_MODAL_UPD);
@@ -501,13 +564,24 @@ void switchtoModalStartP1(){
     lcd.print("P1 START YEAR        ");             
     lcd.setCursor(0, 1);
     lcd.print("                ");                                     
-    newYY = 2018 - 1;
+    newYY = 2019 - 1;
     newMO = 0;
     newDD = 0;
     newHH = 0;
     newMM = 0;                               
     currentModalState = MODAL_START_P1_YY;    
 
+}
+
+void switchtoModalSkip(){
+    lcd.setCursor(0, 0);
+    lcd.print("                ");
+    lcd.setCursor(0, 0);
+    lcd.print("N. SKIP         ");             
+    lcd.setCursor(0, 1);
+    lcd.print("                ");                                     
+    numSkip = 0;
+    currentModalState = MODAL_MENU_PROGR_SKIP;
 }
 
 
@@ -517,6 +591,41 @@ void showSettingParams(){
     if(statusButtonSet == HIGH){              
                 
         switch (currentModalState) {
+
+            case MODAL_MENU_ENTER:
+
+                switch (switchModalMenu)
+                {
+                    case MODAL_MENU_CLOCK:
+                        lcd.setCursor(1, 1);
+                        lcd.print("OROLOGIO        ");                                                
+                        switchModalMenu = MODAL_MENU_PROGR;
+                        break;
+                    case MODAL_MENU_PROGR:
+                        lcd.setCursor(1, 1);
+                        lcd.print("PROGRAMMI       ");                        
+                        switchModalMenu = MODAL_MENU_PROGR_SKIP;
+                        break;
+                    case MODAL_MENU_PROGR_SKIP:
+                        lcd.setCursor(1, 1);
+                        lcd.print("SKIP PROGRAMMI  ");         
+                        switchModalMenu = MODAL_MENU_EXIT;               
+                        break;
+                    case MODAL_MENU_EXIT:
+                        lcd.setCursor(1, 1);
+                        lcd.print("ESCI            ");    
+                        currentModalState = MODAL_RUN;
+                        switchModalMenu = 0;                    
+                        break;
+                
+                    default:
+                        switchModalMenu = MODAL_MENU_CLOCK;
+                        break;
+                }
+
+
+                break;
+
             case MODAL_SET_ONLY_PROG:
                 setOnlyProg = setOnlyProg ? 0 : 1;
                 lcd.setCursor(1, 1);
@@ -526,6 +635,12 @@ void showSettingParams(){
                     lcd.print("NO         ");                        
                 }                
                 break;      
+
+            case MODAL_MENU_PROGR_SKIP:
+                numSkip++;
+                lcd.setCursor(1, 1);
+                lcd.print(numSkip);
+                break;
             case MODAL_UPD_YY:                    
                 newYY++;                                
                 lcd.setCursor(3, 1);
