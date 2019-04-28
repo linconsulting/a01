@@ -39,7 +39,6 @@ LiquidCrystal_I2C lcd(0x27, 16, 2); // set the LCD address to 0x27 for a 16 char
 #define MODAL_FREQ_P2_HH 20
 #define MODAL_P2_ENABLED 21
 
-
 #define MODAL_MENU_ENTER 30
 #define MODAL_MENU_CLOCK 32
 #define MODAL_MENU_PROGR 34
@@ -76,7 +75,6 @@ byte durationShowNext = 15;
 byte freqP1 = 0;
 byte freqP2 = 0;
 byte p2Enabled = 0;
-byte setOnlyProg = 0;
 
 int newYY = 2018;
 int newMO = 0;
@@ -305,8 +303,7 @@ void setStatusModal(){
                         durationP2 = 0;
                         freqP1 = 0;
                         freqP2 = 0;
-                        p2Enabled = 0;
-                        setOnlyProg = 0;
+                        p2Enabled = 0;                        
                         numSkip = 0;
                         switchToModalUpdYY();
                         break;
@@ -317,8 +314,7 @@ void setStatusModal(){
                         durationP2 = 0;
                         freqP1 = 0;
                         freqP2 = 0;
-                        p2Enabled = 0;
-                        setOnlyProg = 0;
+                        p2Enabled = 0;                        
                         numSkip = 0;
                         switchtoModalStartP1();      
                         break;
@@ -341,15 +337,13 @@ void setStatusModal(){
 
 
         break;
-
         case MODAL_MENU_PROGR_SKIP:
             currentModalState = MODAL_RUN;     
             lcd.setCursor(0, 0);
             lcd.print("                ");             
             lcd.setCursor(0, 1);
             lcd.print("                ");
-        break;
-        
+        break;        
         case MODAL_UPD_YY:
             currentModalState = MODAL_UPD_MO;  
             lcd.setCursor(0, 0);
@@ -523,10 +517,9 @@ void setStatusModal(){
         default:
             
             currentModalState = MODAL_MENU_ENTER;
-            switchModalMenu = MODAL_MENU_CLOCK;
+            switchModalMenu = 0;
             lcd.setCursor(0, 0);
-            //lcd.print("SET ONLY PROG?  ");             
-            lcd.print("IMPOSTA         ");
+            lcd.print("IMPOSTA         ");            
             lcd.setCursor(0, 1);
             lcd.print("                ");
             
@@ -546,7 +539,7 @@ void switchToModalUpdYY(){
     lcd.setCursor(0, 0);
     lcd.print("                ");
     lcd.setCursor(0, 0);
-    lcd.print("SET YEAR       ");
+    lcd.print("SET YEAR        ");
     lcd.setCursor(0, 1);
     lcd.print("                ");
     lcd.setCursor(0, 1);
@@ -598,43 +591,32 @@ void showSettingParams(){
                 {
                     case MODAL_MENU_CLOCK:
                         lcd.setCursor(1, 1);
-                        lcd.print("OROLOGIO        ");                                                
+                        lcd.print("PROGRAMMI       ");                        
                         switchModalMenu = MODAL_MENU_PROGR;
                         break;
                     case MODAL_MENU_PROGR:
                         lcd.setCursor(1, 1);
-                        lcd.print("PROGRAMMI       ");                        
+                        lcd.print("SKIP PROGRAMMI  ");         
                         switchModalMenu = MODAL_MENU_PROGR_SKIP;
                         break;
                     case MODAL_MENU_PROGR_SKIP:
                         lcd.setCursor(1, 1);
-                        lcd.print("SKIP PROGRAMMI  ");         
+                        lcd.print("ESCI            ");    
                         switchModalMenu = MODAL_MENU_EXIT;               
                         break;
                     case MODAL_MENU_EXIT:
+                        switchModalMenu = MODAL_MENU_CLOCK;
                         lcd.setCursor(1, 1);
-                        lcd.print("ESCI            ");    
-                        currentModalState = MODAL_RUN;
-                        switchModalMenu = 0;                    
+                        lcd.print("OROLOGIO        ");     
                         break;
                 
                     default:
                         switchModalMenu = MODAL_MENU_CLOCK;
+                        lcd.setCursor(1, 1);
+                        lcd.print("OROLOGIO        ");                                                
                         break;
                 }
-
-
                 break;
-
-            case MODAL_SET_ONLY_PROG:
-                setOnlyProg = setOnlyProg ? 0 : 1;
-                lcd.setCursor(1, 1);
-                if(setOnlyProg){
-                    lcd.print("YES        ");                        
-                }else{
-                    lcd.print("NO         ");                        
-                }                
-                break;      
 
             case MODAL_MENU_PROGR_SKIP:
                 numSkip++;
@@ -649,22 +631,34 @@ void showSettingParams(){
             case MODAL_UPD_MO:                    
                 newMO = newMO >= 12 ? 1 : ++newMO;                
                 lcd.setCursor(3, 1);
-                lcd.print(String(newMO > 9 ? String(newMO) : "0"+String(newMO)));
+                if(newMO <= 9){
+                    lcd.print(0);                    
+                }
+                lcd.print(newMO);
                 break;
             case MODAL_UPD_DD:                    
                 newDD = newDD >= 31 ? 1 : ++newDD;                
                 lcd.setCursor(3, 1);
-                lcd.print(String(newDD > 9 ? String(newDD) : "0"+String(newDD)));
+                if(newDD <= 9){
+                    lcd.print(0);                    
+                }
+                lcd.print(newDD);
                 break;
             case MODAL_UPD_HH:                    
                 newHH = newHH >= 24 ? 1 : ++newHH;
                 lcd.setCursor(3, 1);
-                lcd.print(String(newHH > 9 ? String(newHH) : "0"+String(newHH)));
+                if(newHH <= 9){
+                    lcd.print(0);                    
+                }
+                lcd.print(newHH);                
                 break;
             case MODAL_UPD_MM:                    
                 newMM = newMM >= 60 ? 1 : ++newMM;
                 lcd.setCursor(3, 1);
-                lcd.print(String(newMM > 9 ? String(newMM) : "0"+String(newMM)));
+                if(newMM <= 9){
+                    lcd.print(0);                    
+                }
+                lcd.print(newMM); 
                 break;                            
             case MODAL_START_P1_YY:
                 newYY++;                                
@@ -674,33 +668,50 @@ void showSettingParams(){
             case MODAL_START_P1_MO:
                 newMO = newMO >= 12 ? 1 : ++newMO;                
                 lcd.setCursor(1, 1);
-                lcd.print(String(newMO > 9 ? String(newMO) : "0"+String(newMO)));
+                if(newMO <= 9){
+                    lcd.print(0);                    
+                }
+                lcd.print(newMO);
                 break;                            
             case MODAL_START_P1_DD:                    
                 newDD = newDD >= 31 ? 1 : ++newDD;                
                 lcd.setCursor(1, 1);
-                lcd.print(String(newDD > 9 ? String(newDD) : "0"+String(newDD)));
+                if(newDD <= 9){
+                    lcd.print(0);                    
+                }
+                lcd.print(newDD);
                 break;
             case MODAL_START_P1_HH:                    
                 newHH = newHH >= 24 ? 1 : ++newHH;
                 lcd.setCursor(1, 1);
-                lcd.print(String(newHH > 9 ? String(newHH) : "0"+String(newHH)));
+                if(newHH <= 9){
+                    lcd.print(0);                    
+                }
+                lcd.print(newHH); 
                 break;
             case MODAL_START_P1_MM:                    
                 newMM = newMM >= 60 ? 1 : ++newMM;
                 lcd.setCursor(1, 1);
-                lcd.print(String(newMM > 9 ? String(newMM) : "0"+String(newMM)));
+                if(newMM <= 9){
+                    lcd.print(0);                    
+                }
+                lcd.print(newMM); 
                 break;                                 
             case MODAL_DURAT_P1_MM:
                 durationP1 = ++durationP1;                    
                 lcd.setCursor(1, 1);
-                lcd.print(String(durationP1 > 9 ? String(durationP1) : "0"+String(durationP1)));                    
+                if(durationP1 <= 9){
+                    lcd.print(0);                    
+                }
+                lcd.print(durationP1);
                 break;
             case MODAL_FREQ_P1_HH:
-
                 freqP1 = ++freqP1;
                 lcd.setCursor(1, 1);
-                lcd.print(String(freqP1 > 9 ? String(freqP1) : "0"+String(freqP1)));                    
+                if(freqP1 <= 9){
+                    lcd.print(0);                    
+                }
+                lcd.print(freqP1);
                 break;
             case MODAL_P2_ENABLED:                
                 p2Enabled = p2Enabled ? 0 : 1;
@@ -719,32 +730,50 @@ void showSettingParams(){
             case MODAL_START_P2_MO:
                 newMO = newMO >= 12 ? 1 : ++newMO;                
                 lcd.setCursor(1, 1);
-                lcd.print(String(newMO > 9 ? String(newMO) : "0"+String(newMO)));
+                if(newMO <= 9){
+                    lcd.print(0);                    
+                }
+                lcd.print(newMO);
                 break;                            
             case MODAL_START_P2_DD:                    
                 newDD = newDD >= 31 ? 1 : ++newDD;                
                 lcd.setCursor(1, 1);
-                lcd.print(String(newDD > 9 ? String(newDD) : "0"+String(newDD)));
+                if(newDD <= 9){
+                    lcd.print(0);                    
+                }
+                lcd.print(newDD);
                 break;
             case MODAL_START_P2_HH:                    
                 newHH = newHH >= 24 ? 1 : ++newHH;
                 lcd.setCursor(1, 1);
-                lcd.print(String(newHH > 9 ? String(newHH) : "0"+String(newHH)));
+                if(newHH <= 9){
+                    lcd.print(0);                    
+                }
+                lcd.print(newHH); 
                 break;
             case MODAL_START_P2_MM:                    
                 newMM = newMM >= 60 ? 1 : ++newMM;
                 lcd.setCursor(1, 1);
-                lcd.print(String(newMM > 9 ? String(newMM) : "0"+String(newMM)));
+                if(newMM <= 9){
+                    lcd.print(0);                    
+                }
+                lcd.print(newMM);
                 break;               
             case MODAL_DURAT_P2_MM:
                 durationP2 = ++durationP2;                    
                 lcd.setCursor(1, 1);
-                lcd.print(String(durationP2 > 9 ? String(durationP2) : "0"+String(durationP2)));                    
+                if(durationP2 <= 9){
+                    lcd.print(0);                    
+                }
+                lcd.print(durationP2);
                 break;
             case MODAL_FREQ_P2_HH:
                 freqP2 = ++freqP2;
                 lcd.setCursor(1, 1);
-                lcd.print(String(freqP2 > 9 ? String(freqP2) : "0"+String(freqP2)));                    
+                if(freqP2 <= 9){
+                    lcd.print(0);                    
+                }
+                lcd.print(freqP2);
                 break;                
                 
 
