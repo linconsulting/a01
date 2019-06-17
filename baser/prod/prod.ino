@@ -65,6 +65,10 @@ byte numSkip = 0;
 
 DateTime now = 0;
 uint32_t unixNow;
+uint32_t unixP1Start;
+uint32_t unixP1Stop;
+uint32_t unixP2Start;
+uint32_t unixP2Stop;
 DateTime startTimeP1 = 0;
 DateTime startTimeP2 = 0;
 DateTime lastExecution = 0;
@@ -101,6 +105,7 @@ void setup() {
   rfReceiver.enableReceive(RF_RECEIVER);  
   now = rtc.now();         
   nextExecution = now + TimeSpan(durationShowNext);
+  setSafeEV(); //spengo ev in caso di avvenuto blackout durante irrigazione
 
 }
 
@@ -130,12 +135,14 @@ void loop() {
     }
 
     now = rtc.now();
+    unixNow = now.unixtime();
         
     if(lcdStatus == 1){
         digitalClockDisplay();    
     }
     
     receiveRfSignal();    
+    ctrlTiming();
     ctrlIrrigationStatus();
     setIrrigation();
 
@@ -146,50 +153,115 @@ void loop() {
 
 void digitalClockDisplay(){
 
-                 
-    String strInfo = now.day() > 9 ? String(now.day()) : "0"+String(now.day());
+    byte day = now.day();                
+    String strInfo = "";    
+    if(day < 9){
+        strInfo = String(day);
+    }else{
+        strInfo = "0"+String(day);
+    }
+    strInfo += "/";    
+    byte month = now.month();
+    if(month < 9){
+        strInfo += String(month);
+    }else{
+        strInfo += "0"+String(month);
+    }
     strInfo += "/";
-    strInfo += now.month() > 9 ? String(now.month()) : "0"+String(now.month());
-    strInfo += "/";
-    strInfo += String(now.year());
+    strInfo += String(now.year());    
     strInfo += " ";
-    strInfo += now.hour() > 9 ? String(now.hour()) : "0"+String(now.hour());
+    byte hour = now.hour();
+    if(hour < 9){
+        strInfo += String(hour);
+    }else{
+        strInfo += "0"+String(hour);
+    }
     strInfo += ":";
-    strInfo += now.minute() > 9 ? String(now.minute()) : "0"+String(now.minute());
+    byte minute = now.minute();
+    if(minute < 9){
+        strInfo += String(minute);
+    }else{
+        strInfo += "0"+String(minute);
+    }
+    
     lcd.setCursor(0,0);
     lcd.print(strInfo);            
     
     strInfo = soilStatus == VAL_DRY ? "TA" : "TU";
 
+    uint32_t unixNextExecution = nextExecution.unixtime();
+
     if((currentModalState == MODAL_IRRIG_ON_P1 || currentModalState == MODAL_IRRIG_ON_P2)){
 
         strInfo += " - UE ";        
-        strInfo += now.hour() > 9 ? String(now.hour()) : "0"+String(now.hour());
+        if(hour < 9){
+            strInfo += String(hour);
+        }else{
+            strInfo += "0"+String(hour);
+        }
         strInfo += ":";
-        strInfo += now.minute() > 9 ? String(now.minute()) : "0"+String(now.minute());
+        if(minute < 9){
+            strInfo += String(minute);
+        }else{
+            strInfo += "0"+String(minute);
+        }
 
-    }else if(now.unixtime() < nextExecution.unixtime()){
+    }else if(unixNow < unixNextExecution){
 
-        strInfo += " - UE ";        
-        strInfo += lastExecution.hour() > 9 ? String(lastExecution.hour()) : "0"+String(lastExecution.hour());
+        strInfo += " - UE ";                
+        hour = lastExecution.hour();
+        if(hour < 9){
+            strInfo += String(hour);
+        }else{
+            strInfo += "0"+String(hour);
+        }
         strInfo += ":";
-        strInfo += lastExecution.minute() > 9 ? String(lastExecution.minute()) : "0"+String(lastExecution.minute());
+        minute = lastExecution.minute();
+        if(minute < 9){
+            strInfo += String(minute);
+        }else{
+            strInfo += "0"+String(minute);
+        }
 
     }else{
 
         strInfo += " - PE ";
 
-        if( startTimeP2.unixtime() == 0 || (startTimeP1.unixtime() < startTimeP2.unixtime())){
-            strInfo += startTimeP1.hour() > 9 ? String(startTimeP1.hour()) : "0"+String(startTimeP1.hour());
+        if( p2Enabled == 0 || (unixP1Start < unixP2Start)){
+            hour = startTimeP1.hour();
+            if(hour < 9){
+                strInfo += String(hour);
+            }else{
+                strInfo += "0"+String(hour);
+            }
             strInfo += ":";
-            strInfo += startTimeP1.minute() > 9 ? String(startTimeP1.minute()) : "0"+String(startTimeP1.minute());
+            minute = startTimeP1.minute();
+            if(minute < 9){
+                strInfo += String(minute);
+            }else{
+                strInfo += "0"+String(minute);
+            }
+
         }else{
-            strInfo += startTimeP2.hour() > 9 ? String(startTimeP2.hour()) : "0"+String(startTimeP2.hour());
+            hour = startTimeP2.hour();
+            if(hour < 9){
+                strInfo += String(hour);
+            }else{
+                strInfo += "0"+String(hour);
+            }
             strInfo += ":";
-            strInfo += startTimeP2.minute() > 9 ? String(startTimeP2.minute()) : "0"+String(startTimeP2.minute());
+            minute = startTimeP2.minute();
+            if(minute < 9){
+                strInfo += String(minute);
+            }else{
+                strInfo += "0"+String(minute);
+            }
         }
        
-        nextExecution = (now.unixtime() <= (nextExecution.unixtime() + durationShowNext)) ? nextExecution : now + TimeSpan(durationShowNext);
+        if(unixNow >= (unixNextExecution + durationShowNext)){
+            nextExecution = now + TimeSpan(durationShowNext);
+        }
+
     }
     
     
@@ -201,53 +273,55 @@ void digitalClockDisplay(){
 
 void ctrlIrrigationStatus(){
 
-    unixNow = now.unixtime();
-
-    if(currentModalState >= MODAL_RUN && unixNow >= startTimeP1.unixtime() && soilStatus == VAL_DRY){
+    //CK P1 -- START
+    if(currentModalState >= MODAL_RUN && unixNow >= unixP1Start && soilStatus == VAL_DRY){
 
         if(numSkip > 0){
             numSkip--;
-            startTimeP1 = startTimeP1 + TimeSpan(freqP1*3600UL);    
+            nextTime(1);            
         }else{
             currentModalState = MODAL_IRRIG_ON_P1;
         }
         
     }
-
-    if(currentModalState == MODAL_IRRIG_ON_P1 && unixNow >= (startTimeP1.unixtime() + (durationP1*60))){
+    
+    //CK P1 -- END
+    if(currentModalState == MODAL_IRRIG_ON_P1 && unixNow >= unixP1Stop){
         currentModalState = MODAL_RUN;
-        startTimeP1 = startTimeP1 + TimeSpan(freqP1*3600UL);
+        nextTime(1);        
         lastExecution = now;
     }
 
-    if(currentModalState >= MODAL_RUN && p2Enabled == 1 && unixNow >= startTimeP2.unixtime() && soilStatus == VAL_DRY){
+        
+    //CK P2 -- START
+    if(currentModalState >= MODAL_RUN && p2Enabled == 1 && unixNow >= unixP2Start && soilStatus == VAL_DRY){
         
         if(numSkip > 0){
             numSkip--;
-            startTimeP2 = startTimeP2 + TimeSpan(freqP2*3600UL);
+            nextTime(2);
         }else{
             currentModalState = MODAL_IRRIG_ON_P2;
         }
 
     }
 
-    if(p2Enabled == 1 && currentModalState == MODAL_IRRIG_ON_P2 && unixNow >= (startTimeP2.unixtime() + (durationP2*60))){
+    //CK P2 -- END
+    if(p2Enabled == 1 && currentModalState == MODAL_IRRIG_ON_P2 && unixNow >= unixP2Stop){
         currentModalState = MODAL_RUN;
-        startTimeP2 = startTimeP2 + TimeSpan(freqP2*3600UL);
+        nextTime(2);
         lastExecution = now;
     }
-
     
+    //CK FOR STOP IRRIGATION
     if((currentModalState == MODAL_IRRIG_ON_P1 || currentModalState == MODAL_IRRIG_ON_P2) && soilStatus == VAL_WET){
         currentModalState = MODAL_RUN;
         lastExecution = now;
     }
-
-
     if(p2Enabled == 0 && currentModalState == MODAL_IRRIG_ON_P2){
         currentModalState = MODAL_RUN;
         startTimeP2 = 0;
     }
+    
 
 }
 
@@ -305,6 +379,7 @@ void setStatusModal(){
                         freqP2 = 0;
                         p2Enabled = 0;                        
                         numSkip = 0;
+                        nextExecution = 0;
                         switchToModalUpdYY();
                         break;
 
@@ -316,6 +391,7 @@ void setStatusModal(){
                         freqP2 = 0;
                         p2Enabled = 0;                        
                         numSkip = 0;
+                        nextExecution = 0;
                         switchtoModalStartP1();      
                         break;
 
@@ -411,8 +487,8 @@ void setStatusModal(){
             newYY = startTimeP1.year() - 1;
             newMO = startTimeP1.month() - 1;
             newDD = startTimeP1.day() - 1;
-            newHH = 0;
-            newMM = 0;
+            newHH = -1;
+            newMM = -1;
 
             currentModalState = MODAL_DURAT_P1_MM;    
             lcd.setCursor(0, 0);
@@ -487,8 +563,8 @@ void setStatusModal(){
             newYY = startTimeP2.year() - 1;
             newMO = startTimeP2.month() - 1;
             newDD = startTimeP2.day() - 1;
-            newHH = 0;
-            newMM = 0;
+            newHH = -1;
+            newMM = -1;
 
             currentModalState = MODAL_DURAT_P2_MM;    
             lcd.setCursor(0, 0);
@@ -560,8 +636,8 @@ void switchtoModalStartP1(){
     newYY = 2019 - 1;
     newMO = 0;
     newDD = 0;
-    newHH = 0;
-    newMM = 0;                               
+    newHH = -1;
+    newMM = -1;                               
     currentModalState = MODAL_START_P1_YY;    
 
 }
@@ -860,15 +936,35 @@ void setIrrigation(){
 
     if(currentModalState <= MODAL_RUN && previousModalState != MODAL_DEFAULT_PREV_STATUS && currentModalState != previousModalState){
                 
-        strInfo = now.day() > 9 ? String(now.day()) : "0"+String(now.day());
+        byte day = now.day();                
+        if(day < 9){
+            strInfo = String(day);
+        }else{
+            strInfo = "0"+String(day);
+        }
         strInfo += "/";
-        strInfo += now.month() > 9 ? String(now.month()) : "0"+String(now.month());
+        byte month = now.month();
+        if(month < 9){
+            strInfo += String(month);
+        }else{
+            strInfo += "0"+String(month);
+        }
         strInfo += "/";
-        strInfo += String(now.year());
+        strInfo += String(now.year());    
         strInfo += " ";
-        strInfo += now.hour() > 9 ? String(now.hour()) : "0"+String(now.hour());
+        byte hour = now.hour();
+        if(hour < 9){
+            strInfo += String(hour);
+        }else{
+            strInfo += "0"+String(hour);
+        }
         strInfo += ":";
-        strInfo += now.minute() > 9 ? String(now.minute()) : "0"+String(now.minute());              
+        byte minute = now.minute();
+        if(minute < 9){
+            strInfo += String(minute);
+        }else{
+            strInfo += "0"+String(minute);
+        }
         strInfo += " Eletrov. SPENTA";
         Serial.println(strInfo);
 
@@ -882,15 +978,35 @@ void setIrrigation(){
     if((currentModalState == MODAL_IRRIG_ON_P1 || currentModalState == MODAL_IRRIG_ON_P2) && currentModalState != previousModalState){
         
         
-        strInfo = now.day() > 9 ? String(now.day()) : "0"+String(now.day());
+        byte day = now.day();                
+        if(day < 9){
+            strInfo = String(day);
+        }else{
+            strInfo = "0"+String(day);
+        }
         strInfo += "/";
-        strInfo += now.month() > 9 ? String(now.month()) : "0"+String(now.month());
+        byte month = now.month();
+        if(month < 9){
+            strInfo += String(month);
+        }else{
+            strInfo += "0"+String(month);
+        }
         strInfo += "/";
-        strInfo += String(now.year());
+        strInfo += String(now.year());    
         strInfo += " ";
-        strInfo += now.hour() > 9 ? String(now.hour()) : "0"+String(now.hour());
+        byte hour = now.hour();
+        if(hour < 9){
+            strInfo += String(hour);
+        }else{
+            strInfo += "0"+String(hour);
+        }
         strInfo += ":";
-        strInfo += now.minute() > 9 ? String(now.minute()) : "0"+String(now.minute());              
+        byte minute = now.minute();
+        if(minute < 9){
+            strInfo += String(minute);
+        }else{
+            strInfo += "0"+String(minute);
+        }           
         strInfo += " Eletrov. ACCESA";
         Serial.println(strInfo);
 
@@ -902,4 +1018,39 @@ void setIrrigation(){
 
     }    
 
+}
+
+
+void ctrlTiming(){
+
+    unixP1Start = startTimeP1.unixtime();
+    unixP1Stop = unixP1Start + (durationP1*60);
+
+    if(p2Enabled == 1){
+        unixP2Start = startTimeP2.unixtime();
+        unixP2Stop = unixP2Start + (durationP2*60);    
+    }else{
+        unixP2Start = 0;
+        unixP2Stop = 0;
+    }
+
+}
+
+void nextTime(int pn){
+
+    if(pn == 1){
+        startTimeP1 = startTimeP1 + TimeSpan(freqP1*3600UL);    
+    }
+
+    if(pn == 2){
+        startTimeP2 = startTimeP2 + TimeSpan(freqP2*3600UL);
+    }
+   
+
+}
+
+void setSafeEV(){
+    digitalWrite(RELAIS_EV_STOP, HIGH);        
+    delay(VAL_IMPULSO_EV);
+    digitalWrite(RELAIS_EV_STOP, LOW);
 }
