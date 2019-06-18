@@ -88,6 +88,7 @@ int newMM = 0;
 int newSS = 0;
 
 byte soilStatus = 0;
+byte debugMode = 0;
 
 
 void setup() {
@@ -101,7 +102,10 @@ void setup() {
   currentModalState = MODAL_RUN;
   previousModalState = MODAL_DEFAULT_PREV_STATUS;
   
-  Serial.begin(9600);  
+  if(debugMode){
+      Serial.begin(9600);  
+  }
+  
   rfReceiver.enableReceive(RF_RECEIVER);  
   now = rtc.now();         
   nextExecution = now + TimeSpan(durationShowNext);
@@ -155,14 +159,14 @@ void digitalClockDisplay(){
 
     byte day = now.day();                
     String strInfo = "";    
-    if(day < 9){
+    if(day > 9){
         strInfo = String(day);
     }else{
         strInfo = "0"+String(day);
     }
     strInfo += "/";    
     byte month = now.month();
-    if(month < 9){
+    if(month > 9){
         strInfo += String(month);
     }else{
         strInfo += "0"+String(month);
@@ -171,14 +175,14 @@ void digitalClockDisplay(){
     strInfo += String(now.year());    
     strInfo += " ";
     byte hour = now.hour();
-    if(hour < 9){
+    if(hour > 9){
         strInfo += String(hour);
     }else{
         strInfo += "0"+String(hour);
     }
     strInfo += ":";
     byte minute = now.minute();
-    if(minute < 9){
+    if(minute > 9){
         strInfo += String(minute);
     }else{
         strInfo += "0"+String(minute);
@@ -194,13 +198,13 @@ void digitalClockDisplay(){
     if((currentModalState == MODAL_IRRIG_ON_P1 || currentModalState == MODAL_IRRIG_ON_P2)){
 
         strInfo += " - UE ";        
-        if(hour < 9){
+        if(hour > 9){
             strInfo += String(hour);
         }else{
             strInfo += "0"+String(hour);
         }
         strInfo += ":";
-        if(minute < 9){
+        if(minute > 9){
             strInfo += String(minute);
         }else{
             strInfo += "0"+String(minute);
@@ -210,14 +214,14 @@ void digitalClockDisplay(){
 
         strInfo += " - UE ";                
         hour = lastExecution.hour();
-        if(hour < 9){
+        if(hour > 9){
             strInfo += String(hour);
         }else{
             strInfo += "0"+String(hour);
         }
         strInfo += ":";
         minute = lastExecution.minute();
-        if(minute < 9){
+        if(minute > 9){
             strInfo += String(minute);
         }else{
             strInfo += "0"+String(minute);
@@ -229,14 +233,14 @@ void digitalClockDisplay(){
 
         if( p2Enabled == 0 || (unixP1Start < unixP2Start)){
             hour = startTimeP1.hour();
-            if(hour < 9){
+            if(hour > 9){
                 strInfo += String(hour);
             }else{
                 strInfo += "0"+String(hour);
             }
             strInfo += ":";
             minute = startTimeP1.minute();
-            if(minute < 9){
+            if(minute > 9){
                 strInfo += String(minute);
             }else{
                 strInfo += "0"+String(minute);
@@ -244,14 +248,14 @@ void digitalClockDisplay(){
 
         }else{
             hour = startTimeP2.hour();
-            if(hour < 9){
+            if(hour > 9){
                 strInfo += String(hour);
             }else{
                 strInfo += "0"+String(hour);
             }
             strInfo += ":";
             minute = startTimeP2.minute();
-            if(minute < 9){
+            if(minute > 9){
                 strInfo += String(minute);
             }else{
                 strInfo += "0"+String(minute);
@@ -869,17 +873,20 @@ void receiveGenericRfSignal(){
     
         int value = rfReceiver.getReceivedValue();
         
-        if (value == 0) {
-            Serial.print("Unknown encoding");
-        } else {
-            Serial.print("Received ");
-            Serial.print( rfReceiver.getReceivedValue() );
-            Serial.print(" / ");
-            Serial.print( rfReceiver.getReceivedBitlength() );
-            Serial.print("bit ");
-            Serial.print("Protocol: ");
-            Serial.println( rfReceiver.getReceivedProtocol() );
-        }        
+        if(debugMode){
+
+            if (value == 0) {
+                Serial.print("Unknown encoding");
+            } else {
+                Serial.print("Received ");
+                Serial.print( rfReceiver.getReceivedValue() );
+                Serial.print(" / ");
+                Serial.print( rfReceiver.getReceivedBitlength() );
+                Serial.print("bit ");
+                Serial.print("Protocol: ");
+                Serial.println( rfReceiver.getReceivedProtocol() );
+            }  
+        }      
 
         rfReceiver.resetAvailable();
   }
@@ -894,32 +901,42 @@ void receiveRfSignal(){
         int value = rfReceiver.getReceivedValue();
         
         if (value == 0) {
-            Serial.print("Unknown encoding");
+            if(debugMode){
+                Serial.print("Unknown encoding");
+            }
             soilStatus = VAL_DRY;
 
         } else {
-            Serial.print("Received ");
-            Serial.print( rfReceiver.getReceivedValue() );
-            Serial.print(" / ");
-            Serial.print( rfReceiver.getReceivedBitlength() );
-            Serial.print("bit ");
-            Serial.print("Protocol: ");
-            Serial.println( rfReceiver.getReceivedProtocol() );
+            if(debugMode){
+                Serial.print("Received ");
+                Serial.print( rfReceiver.getReceivedValue() );
+                Serial.print(" / ");
+                Serial.print( rfReceiver.getReceivedBitlength() );
+                Serial.print("bit ");
+                Serial.print("Protocol: ");
+                Serial.println( rfReceiver.getReceivedProtocol() );
+            }
         }
 
         value = map(rfReceiver.getReceivedValue(),VAL_WET_TRIGGER,VAL_MAX_WET,0,100);
 
-        Serial.print("umidita_percent: ");
-        Serial.print(value);
+        if(debugMode){
+            Serial.print("umidita_percent: ");
+            Serial.print(value);
+        }
 
         if (value <= VAL_DRY){
             
-            Serial.println(" Terreno asciutto");
+            if(debugMode){
+                Serial.println(" Terreno asciutto");
+            }
             soilStatus = VAL_DRY;
         }
 
         if (value >= VAL_WET){
-            Serial.println(" Terreno umido");
+            if(debugMode){
+                Serial.println(" Terreno umido");
+            }
             soilStatus = VAL_WET;
         }
 
@@ -936,37 +953,41 @@ void setIrrigation(){
 
     if(currentModalState <= MODAL_RUN && previousModalState != MODAL_DEFAULT_PREV_STATUS && currentModalState != previousModalState){
                 
-        byte day = now.day();                
-        if(day < 9){
-            strInfo = String(day);
-        }else{
-            strInfo = "0"+String(day);
+        if(debugMode){
+
+            byte day = now.day();                
+            if(day > 9){
+                strInfo = String(day);
+            }else{
+                strInfo = "0"+String(day);
+            }
+            strInfo += "/";
+            byte month = now.month();
+            if(month > 9){
+                strInfo += String(month);
+            }else{
+                strInfo += "0"+String(month);
+            }
+            strInfo += "/";
+            strInfo += String(now.year());    
+            strInfo += " ";
+            byte hour = now.hour();
+            if(hour > 9){
+                strInfo += String(hour);
+            }else{
+                strInfo += "0"+String(hour);
+            }
+            strInfo += ":";
+            byte minute = now.minute();
+            if(minute > 9){
+                strInfo += String(minute);
+            }else{
+                strInfo += "0"+String(minute);
+            }
+            strInfo += " Eletrov. SPENTA";
+
+            Serial.println(strInfo);
         }
-        strInfo += "/";
-        byte month = now.month();
-        if(month < 9){
-            strInfo += String(month);
-        }else{
-            strInfo += "0"+String(month);
-        }
-        strInfo += "/";
-        strInfo += String(now.year());    
-        strInfo += " ";
-        byte hour = now.hour();
-        if(hour < 9){
-            strInfo += String(hour);
-        }else{
-            strInfo += "0"+String(hour);
-        }
-        strInfo += ":";
-        byte minute = now.minute();
-        if(minute < 9){
-            strInfo += String(minute);
-        }else{
-            strInfo += "0"+String(minute);
-        }
-        strInfo += " Eletrov. SPENTA";
-        Serial.println(strInfo);
 
         digitalWrite(RELAIS_EV_STOP, HIGH);        
         delay(VAL_IMPULSO_EV);
@@ -978,37 +999,41 @@ void setIrrigation(){
     if((currentModalState == MODAL_IRRIG_ON_P1 || currentModalState == MODAL_IRRIG_ON_P2) && currentModalState != previousModalState){
         
         
-        byte day = now.day();                
-        if(day < 9){
-            strInfo = String(day);
-        }else{
-            strInfo = "0"+String(day);
+        if(debugMode){
+
+            byte day = now.day();                
+            if(day > 9){
+                strInfo = String(day);
+            }else{
+                strInfo = "0"+String(day);
+            }
+            strInfo += "/";
+            byte month = now.month();
+            if(month > 9){
+                strInfo += String(month);
+            }else{
+                strInfo += "0"+String(month);
+            }
+            strInfo += "/";
+            strInfo += String(now.year());    
+            strInfo += " ";
+            byte hour = now.hour();
+            if(hour > 9){
+                strInfo += String(hour);
+            }else{
+                strInfo += "0"+String(hour);
+            }
+            strInfo += ":";
+            byte minute = now.minute();
+            if(minute > 9){
+                strInfo += String(minute);
+            }else{
+                strInfo += "0"+String(minute);
+            }           
+            strInfo += " Eletrov. ACCESA";           
+            
+            Serial.println(strInfo);
         }
-        strInfo += "/";
-        byte month = now.month();
-        if(month < 9){
-            strInfo += String(month);
-        }else{
-            strInfo += "0"+String(month);
-        }
-        strInfo += "/";
-        strInfo += String(now.year());    
-        strInfo += " ";
-        byte hour = now.hour();
-        if(hour < 9){
-            strInfo += String(hour);
-        }else{
-            strInfo += "0"+String(hour);
-        }
-        strInfo += ":";
-        byte minute = now.minute();
-        if(minute < 9){
-            strInfo += String(minute);
-        }else{
-            strInfo += "0"+String(minute);
-        }           
-        strInfo += " Eletrov. ACCESA";
-        Serial.println(strInfo);
 
         digitalWrite(RELAIS_EV_START, HIGH);        
         delay(VAL_IMPULSO_EV);
