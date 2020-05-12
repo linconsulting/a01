@@ -17,6 +17,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2); // set the LCD address to 0x27 for a 16 char
 #define MODAL_RUN 100
 #define MODAL_IRRIG_ON_P1 110 
 #define MODAL_IRRIG_ON_P2 120 
+#define MODAL_IRRIG_ON_MANUAL 130 
 #define MODAL_DEFAULT_PREV_STATUS 200 
 #define MODAL_UPD_YY 2
 #define MODAL_UPD_MO 3
@@ -43,6 +44,8 @@ LiquidCrystal_I2C lcd(0x27, 16, 2); // set the LCD address to 0x27 for a 16 char
 #define MODAL_MENU_CLOCK 32
 #define MODAL_MENU_PROGR 34
 #define MODAL_MENU_PROGR_SKIP 36
+#define MODAL_MENU_MANUAL_START 37
+#define MODAL_MENU_MANUAL_STOP 38
 #define MODAL_MENU_EXIT 40
 
 
@@ -80,7 +83,7 @@ byte freqP1 = 0;
 byte freqP2 = 0;
 byte p2Enabled = 0;
 
-int newYY = 2018;
+int newYY = 2019;
 int newMO = 0;
 int newDD = 0;
 int newHH = 0;
@@ -109,7 +112,7 @@ void setup() {
   rfReceiver.enableReceive(RF_RECEIVER);  
   now = rtc.now();         
   nextExecution = now + TimeSpan(durationShowNext);
-  setSafeEV(); //spengo ev in caso di avvenuto blackout durante irrigazione
+  setEvOff(); //chiudo ev x sicurezza: es in caso di avvenuto blackout durante irrigazione
 
 }
 
@@ -277,6 +280,11 @@ void digitalClockDisplay(){
 
 void ctrlIrrigationStatus(){
 
+    if(currentModalState == MODAL_IRRIG_ON_MANUAL){
+        lastExecution = now;
+        return;
+    }
+
     //CK P1 -- START
     if(currentModalState >= MODAL_RUN && unixNow >= unixP1Start && soilStatus == VAL_DRY){
 
@@ -340,11 +348,11 @@ void switchToModalStartP1(){
         lcd.print("                ");                                     
     }
     
-    newYY = 2020 - 1;
-    newMO = 0;
-    newDD = 0;
-    newHH = -1;
-    newMM = -1;                               
+    newYY = now.year() - 1;
+    newMO = now.month() - 1;
+    newDD = now.day() - 1;
+    newHH = now.hour() - 1;
+    newMM = now.minute() - 1;                               
     currentModalState = MODAL_START_P1_YY;    
 
 }
@@ -421,6 +429,17 @@ void switchToModalMenu(){
         case MODAL_MENU_PROGR_SKIP:
             switchModalMenu = 0;
             switchToModalSkip();      
+            break;
+        case MODAL_MENU_MANUAL_START:            
+            switchModalMenu = 0;            
+            switchToModalRun();
+            setEvOn();                        
+            currentModalState = MODAL_IRRIG_ON_MANUAL;
+            break;
+        case MODAL_MENU_MANUAL_STOP:            
+            switchModalMenu = 0;
+            setEvOff();
+            switchToModalRun();
             break;
 
         case MODAL_MENU_EXIT:
@@ -658,7 +677,19 @@ void switchToModalMenuEnter(){
 
 }
 
-
+/*
+* setStatusModal() e showSettingParams() lavorano
+* in sincronia: la prima è associata alla pressione del
+* pulsante MOD, la seconda la pulsante SET.
+*
+* SI INIZIA QUANDO SI PREME IL PULSANTE MOD    
+* inizialmente currentModalState = MODAL_RUN
+* lo switch parte dal default che lo imposta = MODAL_MENU_ENTER
+* essendo MODAL_MENU_ENTER < MODAL_RUN
+* poi la funzione loop chiama showSettingParams()
+* per la modifica delle relative voci.
+*
+*/
 void setStatusModal(){
   
   if(statusButtonMod == HIGH){
@@ -730,8 +761,7 @@ void setStatusModal(){
                 switchToModalRun();                      
                 
             }else{
-                switchToModalStartP2Yy();                      
-                
+                switchToModalStartP2Yy();      
             }            
             if(lcdStatus){
                 lcd.setCursor(0, 1);
@@ -769,7 +799,6 @@ void setStatusModal(){
             
         break;
         case MODAL_DURAT_P2_MM:
-
             switchToModalFreqP2Hh();            
             
         break;
@@ -822,7 +851,14 @@ void switchToModalSkip(){
     currentModalState = MODAL_MENU_PROGR_SKIP;
 }
 
-
+/* 
+* QUANDO SI PREME IL BOTTONE SET
+* in base alla combinazione dei valori di currentModalState e switchModalMenu
+* si ha la possibilità di compiere le azioni.
+* Esempio quando currentModalState=MODAL_MENU_ENTER e switchModalMenu<>0
+* ad ogni pressione del bottone set si passa alla voce di menù successivo.
+* Nello switch si inizia dal MODAL_MENU_ENTER poi dal suo default.
+*/
 
 void showSettingParams(){
 
@@ -849,6 +885,20 @@ void showSettingParams(){
                         switchModalMenu = MODAL_MENU_PROGR_SKIP;
                         break;
                     case MODAL_MENU_PROGR_SKIP:
+                        if(lcdStatus){
+                            lcd.setCursor(1, 1);
+                            lcd.print("MANUAL START    ");         
+                        }                        
+                        switchModalMenu = MODAL_MENU_MANUAL_START;
+                        break;
+                    case MODAL_MENU_MANUAL_START:
+                        if(lcdStatus){
+                            lcd.setCursor(1, 1);
+                            lcd.print("MANUAL STOP     ");         
+                        }                        
+                        switchModalMenu = MODAL_MENU_MANUAL_STOP;
+                        break;                        
+                    case MODAL_MENU_MANUAL_STOP:
                         if(lcdStatus){
                             lcd.setCursor(1, 1);
                             lcd.print("ESCI            ");    
@@ -1169,6 +1219,10 @@ void receiveRfSignal(){
 
 void setIrrigation(){
 
+    if(currentModalState == MODAL_IRRIG_ON_MANUAL){
+        return;
+    }
+
     String strInfo = "";
 
     if(currentModalState <= MODAL_RUN && previousModalState != MODAL_DEFAULT_PREV_STATUS && currentModalState != previousModalState){
@@ -1209,9 +1263,7 @@ void setIrrigation(){
             Serial.println(strInfo);
         }
 
-        digitalWrite(RELAIS_EV_STOP, HIGH);        
-        delay(VAL_IMPULSO_EV);
-        digitalWrite(RELAIS_EV_STOP, LOW);
+        setEvOff();
         previousModalState = currentModalState;
 
     }
@@ -1255,9 +1307,7 @@ void setIrrigation(){
             Serial.println(strInfo);
         }
 
-        digitalWrite(RELAIS_EV_START, HIGH);        
-        delay(VAL_IMPULSO_EV);
-        digitalWrite(RELAIS_EV_START, LOW);
+        setEvOn();
         previousModalState = currentModalState;
 
 
@@ -1294,8 +1344,17 @@ void nextTime(int pn){
 
 }
 
-void setSafeEV(){
+//apre elettrovalvola
+void setEvOn(){
+    digitalWrite(RELAIS_EV_START, HIGH);        
+    delay(VAL_IMPULSO_EV);
+    digitalWrite(RELAIS_EV_START, LOW);
+
+}
+//chiude elettrovalvola
+void setEvOff(){
     digitalWrite(RELAIS_EV_STOP, HIGH);        
     delay(VAL_IMPULSO_EV);
     digitalWrite(RELAIS_EV_STOP, LOW);
+
 }
