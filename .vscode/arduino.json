@@ -1,0 +1,5 @@
+{
+    "sketch": "baser\\prod\\prod.ino",
+    "board": "arduino:avr:nano",
+    "configuration": "cpu=atmega328"
+}
