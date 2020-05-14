@@ -90,7 +90,7 @@ int newHH = 0;
 int newMM = 0;
 int newSS = 0;
 
-byte soilStatus = 0;
+byte soilStatus = VAL_DRY;
 byte debugMode = 0;
 
 
@@ -148,7 +148,7 @@ void loop() {
         digitalClockDisplay();    
     }
     
-    receiveRfSignal();    
+    //receiveRfSignal();    
     ctrlTiming();
     ctrlIrrigationStatus();
     setIrrigation();
@@ -160,6 +160,8 @@ void loop() {
 
 void digitalClockDisplay(){
 
+    //PREPARO STRINGA PRIMA RIGA DISPLAY
+
     byte day = now.day();                
     String strInfo = "";    
     if(day > 9){
@@ -168,6 +170,7 @@ void digitalClockDisplay(){
         strInfo = "0"+String(day);
     }
     strInfo += "/";    
+    
     byte month = now.month();
     if(month > 9){
         strInfo += String(month);
@@ -177,6 +180,7 @@ void digitalClockDisplay(){
     strInfo += "/";
     strInfo += String(now.year());    
     strInfo += " ";
+    
     byte hour = now.hour();
     if(hour > 9){
         strInfo += String(hour);
@@ -184,6 +188,7 @@ void digitalClockDisplay(){
         strInfo += "0"+String(hour);
     }
     strInfo += ":";
+    
     byte minute = now.minute();
     if(minute > 9){
         strInfo += String(minute);
@@ -192,7 +197,9 @@ void digitalClockDisplay(){
     }
     
     lcd.setCursor(0,0);
-    lcd.print(strInfo);            
+    lcd.print(strInfo);      
+
+    //PREPARO STRINGA SECONDA RIGA DISPLAY      
     
     strInfo = soilStatus == VAL_DRY ? "TA" : "TU";
 
@@ -739,11 +746,11 @@ void setStatusModal(){
         case MODAL_START_P1_MM:
 
             startTimeP1 = DateTime(newYY, newMO, newDD, newHH, newMM, newSS);
-            newYY = startTimeP1.year() - 1;
-            newMO = startTimeP1.month() - 1;
-            newDD = startTimeP1.day() - 1;
-            newHH = -1;
-            newMM = -1;
+            newYY = now.year() - 1;
+            newMO = now.month() - 1;
+            newDD = now.day() - 1;
+            newHH = now.hour() - 1;
+            newMM = now.minute() -1;
 
             switchToModalDuratP1Mm();
             
@@ -789,11 +796,11 @@ void setStatusModal(){
         case MODAL_START_P2_MM:
 
             startTimeP2 = DateTime(newYY, newMO, newDD, newHH, newMM, newSS);
-            newYY = startTimeP2.year() - 1;
-            newMO = startTimeP2.month() - 1;
-            newDD = startTimeP2.day() - 1;
-            newHH = -1;
-            newMM = -1;
+            newYY = now.year() - 1;
+            newMO = now.month() - 1;
+            newDD = now.day() - 1;
+            newHH = now.hour() -1;
+            newMM = now.minute() -1;
 
             switchToModalDuratP2Mm();
             
