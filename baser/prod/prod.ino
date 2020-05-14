@@ -11,8 +11,8 @@ LiquidCrystal_I2C lcd(0x27, 16, 2); // set the LCD address to 0x27 for a 16 char
 
 #define BUTTON_SET 8
 #define BUTTON_MOD 7
-#define RELAIS_EV_START 9
-#define RELAIS_EV_STOP 10
+#define RELAIS_EV_STOP 9
+#define RELAIS_EV_START 10
 #define BLINK_INT_MODAL_UPD 500
 #define MODAL_RUN 100
 #define MODAL_IRRIG_ON_P1 110 
