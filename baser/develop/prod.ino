@@ -1,9 +1,9 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include "RTClib.h"
-#include <RCSwitch.h>
+//#include <RCSwitch.h>
 
-RCSwitch rfReceiver = RCSwitch();
+//RCSwitch rfReceiver = RCSwitch();
 
 RTC_DS3231 rtc;
 LiquidCrystal_I2C lcd(0x27, 16, 2); // set the LCD address to 0x27 for a 16 chars and 2 line display
@@ -109,7 +109,7 @@ void setup() {
       Serial.begin(9600);  
   }
   
-  rfReceiver.enableReceive(RF_RECEIVER);  
+  //rfReceiver.enableReceive(RF_RECEIVER);  
   now = rtc.now();         
   nextExecution = now + TimeSpan(durationShowNext);
   setEvOff(); //chiudo ev x sicurezza: es in caso di avvenuto blackout durante irrigazione
@@ -1144,7 +1144,7 @@ void showSettingParams(){
 
 
 
-void receiveGenericRfSignal(){
+/* void receiveGenericRfSignal(){
 
     if (rfReceiver.available()) {
     
@@ -1169,7 +1169,7 @@ void receiveGenericRfSignal(){
   }
 
 
-}
+} 
 
 void receiveRfSignal(){
 
@@ -1222,7 +1222,7 @@ void receiveRfSignal(){
 
 
 }
-
+*/
 
 void setIrrigation(){
 
