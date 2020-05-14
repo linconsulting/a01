@@ -1,9 +1,7 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include "RTClib.h"
-//#include <RCSwitch.h>
 
-//RCSwitch rfReceiver = RCSwitch();
 
 RTC_DS3231 rtc;
 LiquidCrystal_I2C lcd(0x27, 16, 2); // set the LCD address to 0x27 for a 16 chars and 2 line display
@@ -48,18 +46,11 @@ LiquidCrystal_I2C lcd(0x27, 16, 2); // set the LCD address to 0x27 for a 16 char
 #define MODAL_MENU_MANUAL_STOP 38
 #define MODAL_MENU_EXIT 40
 
-
-#define RF_RECEIVER 0  // Receiver on interrupt 0 => that is pin #2
-#define VAL_DRY 0  
-#define VAL_WET 1  
-#define VAL_MAX_DRY 1023
-#define VAL_MAX_WET 280
-#define VAL_WET_TRIGGER 550
 #define VAL_IMPULSO_EV 200  
 
 
-int  statusButtonMod = 0;
-int  statusButtonSet = 0;
+byte statusButtonMod = 0;
+byte statusButtonSet = 0;
 byte currentModalState = 0;
 byte previousModalState = 0;
 byte lcdStatus = 0;
@@ -84,13 +75,13 @@ byte freqP2 = 0;
 byte p2Enabled = 0;
 
 int newYY = 2019;
-int newMO = 0;
-int newDD = 0;
-int newHH = 0;
-int newMM = 0;
-int newSS = 0;
+byte newMO = 0;
+byte newDD = 0;
+byte newHH = 0;
+byte newMM = 0;
+byte newSS = 0;
 
-byte soilStatus = VAL_DRY;
+byte soilStatus = 0; //0 terreno asciutto, 1 bagnato -- AL MOMENTO SEMPRE ASCIUTTO
 byte debugMode = 0;
 
 
@@ -109,7 +100,6 @@ void setup() {
       Serial.begin(9600);  
   }
   
-  //rfReceiver.enableReceive(RF_RECEIVER);  
   now = rtc.now();         
   nextExecution = now + TimeSpan(durationShowNext);
   setEvOff(); //chiudo ev x sicurezza: es in caso di avvenuto blackout durante irrigazione
@@ -201,28 +191,36 @@ void digitalClockDisplay(){
 
     //PREPARO STRINGA SECONDA RIGA DISPLAY      
     
-    strInfo = soilStatus == VAL_DRY ? "TA" : "TU";
+    strInfo = "";
 
     uint32_t unixNextExecution = nextExecution.unixtime();
 
     if((currentModalState == MODAL_IRRIG_ON_P1 || currentModalState == MODAL_IRRIG_ON_P2)){
-
-        strInfo += " - UE ";        
-        if(hour > 9){
-            strInfo += String(hour);
-        }else{
-            strInfo += "0"+String(hour);
-        }
-        strInfo += ":";
-        if(minute > 9){
-            strInfo += String(minute);
-        }else{
-            strInfo += "0"+String(minute);
-        }
+        
+        //MENTRE AVVIENE L'IRRIGAZIONE
+        strInfo += " IRRIGAZIONE ON ";                
 
     }else if(unixNow < unixNextExecution){
 
-        strInfo += " - UE ";                
+        //ULTIMA ESECUZIONE
+        //U 01011970 00:00
+        strInfo += "U ";                
+        day = lastExecution.day();   
+        if(day > 9){
+            strInfo = String(day);
+        }else{
+            strInfo = "0"+String(day);
+        }
+                
+        month = lastExecution.month();
+        if(month > 9){
+            strInfo += String(month);
+        }else{
+            strInfo += "0"+String(month);
+        }
+        strInfo += String(lastExecution.year());    
+        strInfo += " ";
+
         hour = lastExecution.hour();
         if(hour > 9){
             strInfo += String(hour);
@@ -239,9 +237,29 @@ void digitalClockDisplay(){
 
     }else{
 
-        strInfo += " - PE ";
+        //PROSSIMA ESECUZIONE
+        //P 01011970 00:00
+
+        strInfo += "P ";
 
         if( p2Enabled == 0 || (unixP1Start < unixP2Start)){
+
+            day = startTimeP1.day();   
+            if(day > 9){
+                strInfo = String(day);
+            }else{
+                strInfo = "0"+String(day);
+            }
+                    
+            month = startTimeP1.month();
+            if(month > 9){
+                strInfo += String(month);
+            }else{
+                strInfo += "0"+String(month);
+            }
+            strInfo += String(startTimeP1.year());    
+            strInfo += " ";            
+            
             hour = startTimeP1.hour();
             if(hour > 9){
                 strInfo += String(hour);
@@ -257,6 +275,23 @@ void digitalClockDisplay(){
             }
 
         }else{
+            
+            day = startTimeP2.day();   
+            if(day > 9){
+                strInfo = String(day);
+            }else{
+                strInfo = "0"+String(day);
+            }
+                    
+            month = startTimeP2.month();
+            if(month > 9){
+                strInfo += String(month);
+            }else{
+                strInfo += "0"+String(month);
+            }
+            strInfo += String(startTimeP2.year());    
+            strInfo += " ";              
+                        
             hour = startTimeP2.hour();
             if(hour > 9){
                 strInfo += String(hour);
@@ -293,7 +328,7 @@ void ctrlIrrigationStatus(){
     }
 
     //CK P1 -- START
-    if(currentModalState >= MODAL_RUN && unixNow >= unixP1Start && soilStatus == VAL_DRY){
+    if(currentModalState >= MODAL_RUN && unixNow >= unixP1Start && soilStatus == 0){
 
         if(numSkip > 0){
             numSkip--;
@@ -313,7 +348,7 @@ void ctrlIrrigationStatus(){
 
         
     //CK P2 -- START
-    if(currentModalState >= MODAL_RUN && p2Enabled == 1 && unixNow >= unixP2Start && soilStatus == VAL_DRY){
+    if(currentModalState >= MODAL_RUN && p2Enabled == 1 && unixNow >= unixP2Start && soilStatus == 0){
         
         if(numSkip > 0){
             numSkip--;
@@ -332,7 +367,7 @@ void ctrlIrrigationStatus(){
     }
     
     //CK FOR STOP IRRIGATION
-    if((currentModalState == MODAL_IRRIG_ON_P1 || currentModalState == MODAL_IRRIG_ON_P2) && soilStatus == VAL_WET){
+    if((currentModalState == MODAL_IRRIG_ON_P1 || currentModalState == MODAL_IRRIG_ON_P2) && soilStatus == 1){
         currentModalState = MODAL_RUN;
         lastExecution = now;
     }
@@ -1143,86 +1178,6 @@ void showSettingParams(){
 }
 
 
-
-/* void receiveGenericRfSignal(){
-
-    if (rfReceiver.available()) {
-    
-        int value = rfReceiver.getReceivedValue();
-        
-        if(debugMode){
-
-            if (value == 0) {
-                Serial.print("Unknown encoding");
-            } else {
-                Serial.print("Received ");
-                Serial.print( rfReceiver.getReceivedValue() );
-                Serial.print(" / ");
-                Serial.print( rfReceiver.getReceivedBitlength() );
-                Serial.print("bit ");
-                Serial.print("Protocol: ");
-                Serial.println( rfReceiver.getReceivedProtocol() );
-            }  
-        }      
-
-        rfReceiver.resetAvailable();
-  }
-
-
-} 
-
-void receiveRfSignal(){
-
-    if (rfReceiver.available()) {
-    
-        int value = rfReceiver.getReceivedValue();
-        
-        if (value == 0) {
-            if(debugMode){
-                Serial.print("Unknown encoding");
-            }
-            soilStatus = VAL_DRY;
-
-        } else {
-            if(debugMode){
-                Serial.print("Received ");
-                Serial.print( rfReceiver.getReceivedValue() );
-                Serial.print(" / ");
-                Serial.print( rfReceiver.getReceivedBitlength() );
-                Serial.print("bit ");
-                Serial.print("Protocol: ");
-                Serial.println( rfReceiver.getReceivedProtocol() );
-            }
-        }
-
-        value = map(rfReceiver.getReceivedValue(),VAL_WET_TRIGGER,VAL_MAX_WET,0,100);
-
-        if(debugMode){
-            Serial.print("umidita_percent: ");
-            Serial.print(value);
-        }
-
-        if (value <= VAL_DRY){
-            
-            if(debugMode){
-                Serial.println(" Terreno asciutto");
-            }
-            soilStatus = VAL_DRY;
-        }
-
-        if (value >= VAL_WET){
-            if(debugMode){
-                Serial.println(" Terreno umido");
-            }
-            soilStatus = VAL_WET;
-        }
-
-        rfReceiver.resetAvailable();
-  }
-
-
-}
-*/
 
 void setIrrigation(){
 
