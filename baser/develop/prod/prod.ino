@@ -207,9 +207,9 @@ void digitalClockDisplay(){
         strInfo += "U ";                
         day = lastExecution.day();   
         if(day > 9){
-            strInfo = String(day);
+            strInfo += String(day);
         }else{
-            strInfo = "0"+String(day);
+            strInfo += "0"+String(day);
         }
                 
         month = lastExecution.month();
@@ -246,9 +246,9 @@ void digitalClockDisplay(){
 
             day = startTimeP1.day();   
             if(day > 9){
-                strInfo = String(day);
+                strInfo += String(day);
             }else{
-                strInfo = "0"+String(day);
+                strInfo += "0"+String(day);
             }
                     
             month = startTimeP1.month();
@@ -929,14 +929,14 @@ void showSettingParams(){
                     case MODAL_MENU_PROGR_SKIP:
                         if(lcdStatus){
                             lcd.setCursor(1, 1);
-                            lcd.print("MANUAL START    ");         
+                            lcd.print("START MANUALE   ");         
                         }                        
                         switchModalMenu = MODAL_MENU_MANUAL_START;
                         break;
                     case MODAL_MENU_MANUAL_START:
                         if(lcdStatus){
                             lcd.setCursor(1, 1);
-                            lcd.print("MANUAL STOP     ");         
+                            lcd.print("STOP MANUALE    ");         
                         }                        
                         switchModalMenu = MODAL_MENU_MANUAL_STOP;
                         break;                        
