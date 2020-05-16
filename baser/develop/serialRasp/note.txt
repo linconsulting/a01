@@ -1,0 +1,12 @@
+funzioni tramite stringhe seriali:
+
+RICEZIONE:
+
+01. ricevi data e ora x orologio:       DTaaaammgghhmmss
+02. ricevi data e ora x programma 1:    P1aaaammgghhmmss
+03. ricevi data e ora x programma 2:    P2aaaammgghhmmss
+
+INVIO:
+
+01. invia status comando eseguito:      CMDOK | CMDKO
+02. invia status ultima esecuzione:     P1aaaammgghhmmss

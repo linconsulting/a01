@@ -1,6 +1,7 @@
 {
-    "sketch": "baser\\prod\\prod.ino",
+    "sketch": "baser\\develop\\prod.ino",
     "board": "arduino:avr:nano",
     "configuration": "cpu=atmega328old",
-    "port": "COM6"
+    "port": "COM6",
+    "programmer": "AVRISP mkII"
 }
