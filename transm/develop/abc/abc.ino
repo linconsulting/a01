@@ -25,9 +25,14 @@
  This example code is in the public domain.
 
  */
+
 #include <SoftwareSerial.h>
 
-SoftwareSerial mySerial(2, 3); // RX, TX
+#define rxPin 2
+#define txPin 3
+
+
+SoftwareSerial mySerial =  SoftwareSerial(rxPin, txPin);
 
 char inData[20]; // Allocate some space for the string
 char inChar=-1; // Where to store the character read
@@ -36,8 +41,12 @@ byte index = 0; // Index into array; where to store the character
 
 void setup()
 {
+
+  pinMode(rxPin, INPUT);
+  pinMode(txPin, OUTPUT);
+
   // Open serial communications and wait for port to open:
-  Serial.begin(115200);
+  Serial.begin(9600);
   while (!Serial) {
     ; // wait for serial port to connect. Needed for Native USB only
   }
@@ -45,7 +54,7 @@ void setup()
   
   // set the data rate for the SoftwareSerial port
   //mySerial.begin(38400);
-  mySerial.begin(57600);
+  mySerial.begin(9600);
   mySerial.println("Hello, world?");
 
   Serial.println("Setup avvenuto.");
