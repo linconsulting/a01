@@ -57,16 +57,16 @@ byte lcdStatus = 0;
 byte switchModalMenu = 0;
 byte numSkip = 0;
 
-DateTime now = 0;
+DateTime now = (uint32_t)0;
 uint32_t unixNow;
 uint32_t unixP1Start;
 uint32_t unixP1Stop;
 uint32_t unixP2Start;
 uint32_t unixP2Stop;
-DateTime startTimeP1 = 0;
-DateTime startTimeP2 = 0;
-DateTime lastExecution = 0;
-DateTime nextExecution = 0;
+DateTime startTimeP1 = (uint32_t)0;
+DateTime startTimeP2 = (uint32_t)0;
+DateTime lastExecution = (uint32_t)0;
+DateTime nextExecution = (uint32_t)0;
 byte durationP1 = 0;
 byte durationP2 = 0;
 byte durationShowNext = 15;
@@ -373,7 +373,7 @@ void ctrlIrrigationStatus(){
     }
     if(p2Enabled == 0 && currentModalState == MODAL_IRRIG_ON_P2){
         currentModalState = MODAL_RUN;
-        startTimeP2 = 0;
+        startTimeP2 = (uint32_t)0;
     }
     
 
@@ -450,7 +450,7 @@ void resetBaseVars(){
     freqP2 = 0;
     p2Enabled = 0;                        
     numSkip = 0;
-    nextExecution = 0;
+    nextExecution = (uint32_t)0;
 
 }
 
