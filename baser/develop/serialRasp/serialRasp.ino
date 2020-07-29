@@ -383,11 +383,11 @@ void switchToModalStartP1(){
 
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("                ");
+        lcd.print(F("                "));
         lcd.setCursor(0, 0);
-        lcd.print("P1 START YEAR        ");             
+        lcd.print(F("P1 START YEAR        "));             
         lcd.setCursor(0, 1);
-        lcd.print("                ");                                     
+        lcd.print(F("                "));                                     
     }
     
     newYY = now.year() - 1;
@@ -406,7 +406,7 @@ void rtcSetup(){
   if (! rtc.begin()) {
     if(lcdStatus){
         lcd.setCursor(0,0);
-        lcd.print("Couldn't find RTC");
+        lcd.print(F("Couldn't find RTC"));
     }
     while (1);
   }
@@ -414,9 +414,9 @@ void rtcSetup(){
 
     if(lcdStatus){
         lcd.setCursor(0,0);
-        lcd.print("RTC lost power,");    
+        lcd.print(F("RTC lost power,"));    
         lcd.setCursor(0,1);
-        lcd.print("set the time!");    
+        lcd.print(F("set the time!"));    
     }      
     
     // following line sets the RTC to the date & time this sketch was compiled
@@ -501,9 +501,9 @@ void switchToModalUpdMo(){
     currentModalState = MODAL_UPD_MO;  
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("SET MONTH       ");
+        lcd.print(F("SET MONTH       "));
         lcd.setCursor(0, 1);
-        lcd.print("MO        ");          
+        lcd.print(F("MO        "));          
     }      
 
 }
@@ -513,9 +513,9 @@ void switchToModalUpdDd(){
     if(lcdStatus)
     {
         lcd.setCursor(0, 0);
-        lcd.print("SET DAY       ");
+        lcd.print(F("SET DAY       "));
         lcd.setCursor(0, 1);
-        lcd.print("DD        ");   
+        lcd.print(F("DD        "));   
     }     
 
 }
@@ -524,9 +524,9 @@ void switchToModalUpdHh(){
     currentModalState = MODAL_UPD_HH;     
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("SET HOURS       ");
+        lcd.print(F("SET HOURS       "));
         lcd.setCursor(0, 1);
-        lcd.print("HH        ");       
+        lcd.print(F("HH        "));       
     }
 
 }
@@ -535,9 +535,9 @@ void switchToModalUpdMm(){
     currentModalState = MODAL_UPD_MM;    
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("SET MINUTES       ");
+        lcd.print(F("SET MINUTES       "));
         lcd.setCursor(0, 1);
-        lcd.print("MM        ");        
+        lcd.print(F("MM        "));        
     }
 
 }
@@ -547,9 +547,9 @@ void switchToModalStartP1Mo(){
     currentModalState = MODAL_START_P1_MO;    
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("P1 START MONTH        ");             
+        lcd.print(F("P1 START MONTH        "));             
         lcd.setCursor(0, 1);
-        lcd.print("                ");
+        lcd.print(F("                "));
     }
 
 }
@@ -558,9 +558,9 @@ void switchToModalStartP1Dd(){
     currentModalState = MODAL_START_P1_DD;    
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("P1 START DAY        ");             
+        lcd.print(F("P1 START DAY        "));             
         lcd.setCursor(0, 1);
-        lcd.print("                ");
+        lcd.print(F("                "));
     }
 
 }
@@ -569,9 +569,9 @@ void switchToModalStartP1Hh(){
     currentModalState = MODAL_START_P1_HH;    
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("P1 START HOUR        ");             
+        lcd.print(F("P1 START HOUR        "));             
         lcd.setCursor(0, 1);
-        lcd.print("                ");
+        lcd.print(F("                "));
     }
 
 }
@@ -580,9 +580,9 @@ void switchToModalStartP1Mm(){
     currentModalState = MODAL_START_P1_MM;    
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("P1 START MINUTES       ");             
+        lcd.print(F("P1 START MINUTES       "));             
         lcd.setCursor(0, 1);
-        lcd.print("                ");
+        lcd.print(F("                "));
     }
 
 }
@@ -591,9 +591,9 @@ void switchToModalDuratP1Mm(){
     currentModalState = MODAL_DURAT_P1_MM;    
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("P1 DURAT MINUTES       ");             
+        lcd.print(F("P1 DURAT MINUTES       "));             
         lcd.setCursor(0, 1);
-        lcd.print("                ");
+        lcd.print(F("                "));
     }
 
 }
@@ -602,9 +602,9 @@ void switchToModalFreqP1Hh(){
     currentModalState = MODAL_FREQ_P1_HH;
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("P1 FREQ HOURS       ");             
+        lcd.print(F("P1 FREQ HOURS       "));             
         lcd.setCursor(0, 1);
-        lcd.print("                ");
+        lcd.print(F("                "));
     }
 
 }
@@ -613,9 +613,9 @@ void switchToModalP2Enabled(){
     currentModalState = MODAL_P2_ENABLED;
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("P2 ENABLED         ");             
+        lcd.print(F("P2 ENABLED         "));             
         lcd.setCursor(0, 1);
-        lcd.print("                ");
+        lcd.print(F("                "));
     }    
 
 }
@@ -624,7 +624,7 @@ void switchToModalStartP2Yy(){
     currentModalState = MODAL_START_P2_YY;    
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("P2 START YEAR        ");             
+        lcd.print(F("P2 START YEAR        "));             
     }
 
 }
@@ -633,9 +633,9 @@ void switchToModalRun(){
     currentModalState = MODAL_RUN;
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("                ");
+        lcd.print(F("                "));
         lcd.setCursor(0, 1);
-        lcd.print("                ");            
+        lcd.print(F("                "));            
     }
 
 }
@@ -644,9 +644,9 @@ void switchToModalStartP2Mo(){
     currentModalState = MODAL_START_P2_MO;    
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("P2 START MONTH        ");             
+        lcd.print(F("P2 START MONTH        "));             
         lcd.setCursor(0, 1);
-        lcd.print("                ");
+        lcd.print(F("                "));
     }
 
 }
@@ -656,9 +656,9 @@ void switchToModalStartP2Dd(){
     currentModalState = MODAL_START_P2_DD;    
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("P2 START DAY        ");             
+        lcd.print(F("P2 START DAY        "));             
         lcd.setCursor(0, 1);
-        lcd.print("                ");
+        lcd.print(F("                "));
     }
 
 }
@@ -667,9 +667,9 @@ void switchToModalStartP2Hh(){
     currentModalState = MODAL_START_P2_HH;    
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("P2 START HOUR        ");             
+        lcd.print(F("P2 START HOUR        "));             
         lcd.setCursor(0, 1);
-        lcd.print("                ");
+        lcd.print(F("                "));
     }
 
 }
@@ -678,9 +678,9 @@ void switchToModalStartP2Mm(){
     currentModalState = MODAL_START_P2_MM;    
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("P2 START MINUTES       ");             
+        lcd.print(F("P2 START MINUTES       "));             
         lcd.setCursor(0, 1);
-        lcd.print("                ");
+        lcd.print(F("                "));
     }
 
 }
@@ -689,9 +689,9 @@ void switchToModalDuratP2Mm(){
     currentModalState = MODAL_DURAT_P2_MM;    
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("P2 DURAT MINUTES       ");             
+        lcd.print(F("P2 DURAT MINUTES       "));             
         lcd.setCursor(0, 1);
-        lcd.print("                ");
+        lcd.print(F("                "));
     }
 
 }
@@ -700,9 +700,9 @@ void switchToModalFreqP2Hh(){
     currentModalState = MODAL_FREQ_P2_HH;
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("P2 FREQ HOURS       ");             
+        lcd.print(F("P2 FREQ HOURS       "));             
         lcd.setCursor(0, 1);
-        lcd.print("                ");
+        lcd.print(F("                "));
     }
 
 }
@@ -712,9 +712,9 @@ void switchToModalMenuEnter(){
     switchModalMenu = 0;
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("IMPOSTA         ");            
+        lcd.print(F("IMPOSTA         "));            
         lcd.setCursor(0, 1);
-        lcd.print("                ");
+        lcd.print(F("                "));
     }
 
 }
@@ -807,7 +807,7 @@ void setStatusModal(){
             }            
             if(lcdStatus){
                 lcd.setCursor(0, 1);
-                lcd.print("                ");
+                lcd.print(F("                "));
             }
             
         break;
@@ -866,13 +866,13 @@ void switchToModalUpdYY(){
     currentModalState = MODAL_UPD_YY;            
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("                ");
+        lcd.print(F("                "));
         lcd.setCursor(0, 0);
-        lcd.print("SET YEAR        ");
+        lcd.print(F("SET YEAR        "));
         lcd.setCursor(0, 1);
-        lcd.print("                ");
+        lcd.print(F("                "));
         lcd.setCursor(0, 1);
-        lcd.print("YY");
+        lcd.print(F("YY"));
     }
        
 
@@ -883,11 +883,11 @@ void switchToModalSkip(){
 
     if(lcdStatus){
         lcd.setCursor(0, 0);
-        lcd.print("                ");
+        lcd.print(F("                "));
         lcd.setCursor(0, 0);
-        lcd.print("N. SKIP         ");             
+        lcd.print(F("N. SKIP         "));             
         lcd.setCursor(0, 1);
-        lcd.print("                ");                                     
+        lcd.print(F("                "));                                     
     }    
     numSkip = 0;
     currentModalState = MODAL_MENU_PROGR_SKIP;
@@ -915,42 +915,42 @@ void showSettingParams(){
                     case MODAL_MENU_CLOCK:
                         if(lcdStatus){
                             lcd.setCursor(1, 1);
-                            lcd.print("PROGRAMMI       ");                        
+                            lcd.print(F("PROGRAMMI       "));                        
                         }                        
                         switchModalMenu = MODAL_MENU_PROGR;
                         break;
                     case MODAL_MENU_PROGR:
                         if(lcdStatus){
                             lcd.setCursor(1, 1);
-                            lcd.print("SKIP PROGRAMMI  ");         
+                            lcd.print(F("SKIP PROGRAMMI  "));         
                         }                        
                         switchModalMenu = MODAL_MENU_PROGR_SKIP;
                         break;
                     case MODAL_MENU_PROGR_SKIP:
                         if(lcdStatus){
                             lcd.setCursor(1, 1);
-                            lcd.print("START MANUALE   ");         
+                            lcd.print(F("START MANUALE   "));         
                         }                        
                         switchModalMenu = MODAL_MENU_MANUAL_START;
                         break;
                     case MODAL_MENU_MANUAL_START:
                         if(lcdStatus){
                             lcd.setCursor(1, 1);
-                            lcd.print("STOP MANUALE    ");         
+                            lcd.print(F("STOP MANUALE    "));         
                         }                        
                         switchModalMenu = MODAL_MENU_MANUAL_STOP;
                         break;                        
                     case MODAL_MENU_MANUAL_STOP:
                         if(lcdStatus){
                             lcd.setCursor(1, 1);
-                            lcd.print("ESCI            ");    
+                            lcd.print(F("ESCI            "));    
                         }                        
                         switchModalMenu = MODAL_MENU_EXIT;               
                         break;
                     case MODAL_MENU_EXIT:
                         if(lcdStatus){
                             lcd.setCursor(1, 1);
-                            lcd.print("OROLOGIO        ");     
+                            lcd.print(F("OROLOGIO        "));     
                         }
                         switchModalMenu = MODAL_MENU_CLOCK;                        
                         break;
@@ -958,7 +958,7 @@ void showSettingParams(){
                     default:
                         if(lcdStatus){
                             lcd.setCursor(1, 1);
-                            lcd.print("OROLOGIO        ");                                                
+                            lcd.print(F("OROLOGIO        "));                                                
                         }                        
                         switchModalMenu = MODAL_MENU_CLOCK;                        
                         break;
@@ -1095,9 +1095,9 @@ void showSettingParams(){
                 if(lcdStatus){
                     lcd.setCursor(1, 1);
                     if(p2Enabled){
-                        lcd.print("YES        ");                        
+                        lcd.print(F("YES        "));                        
                     }else{
-                        lcd.print("NO         ");                        
+                        lcd.print(F("NO         "));                        
                     }                
                 }                
                 break;                                                                
