@@ -26,9 +26,9 @@ void setup()
   
   //the SoftwareSerial port:  
   mySerial.begin(9600);
-  mySerial.println("Abc started.");
+  mySerial.println(F("Abc started."));
 
-  Serial.println("Setup avvenuto.");
+  Serial.println(F("Setup avvenuto."));
 
 
 }

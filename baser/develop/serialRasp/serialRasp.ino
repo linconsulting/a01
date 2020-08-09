@@ -198,7 +198,7 @@ void digitalClockDisplay(){
     if((currentModalState == MODAL_IRRIG_ON_P1 || currentModalState == MODAL_IRRIG_ON_P2)){
         
         //MENTRE AVVIENE L'IRRIGAZIONE
-        strInfo += " IRRIGAZIONE ON ";                
+        strInfo += F(" IRRIGAZIONE ON ");                
 
     }else if(unixNow < unixNextExecution){
 
@@ -887,7 +887,7 @@ void switchToModalSkip(){
         lcd.setCursor(0, 0);
         lcd.print(F("N. SKIP         "));             
         lcd.setCursor(0, 1);
-        lcd.print(F("                "));                                     
+        lcd.print(F("0               "));                                     
     }    
     numSkip = 0;
     currentModalState = MODAL_MENU_PROGR_SKIP;
