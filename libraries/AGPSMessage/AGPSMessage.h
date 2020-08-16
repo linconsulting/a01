@@ -20,14 +20,17 @@
 #define AGPSMessage_h
 
 #include "Arduino.h"
+#include <SoftwareSerial.h>
 
 class AGPSMessage
 {
   public:
     AGPSMessage();
     AGPSMessage(char inputChar);
-    void appendChar(char value);
+    //void appendChar(char value);
     void setCharMsg(byte index, char value);    
+    boolean readFromSerial(SoftwareSerial &serial);
+    boolean readFromSerial(HardwareSerial &serial);
     char paramCode[3];
     byte paramValueType;
     char paramValue[10];
@@ -35,7 +38,10 @@ class AGPSMessage
     boolean paramValueIsComplete;
 
   private:
-    char msg[20];
+    //char msg[20];
+    char inChar;
+    byte index, count;
+    const byte maxInputChar = 20;
 };
 
 #endif
