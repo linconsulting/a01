@@ -40,13 +40,26 @@ void AGPSMessage::setDefaultValue(){
     
 }
 
-boolean AGPSMessage::readFromSerial(SoftwareSerial &serial){
+boolean AGPSMessage::rFS(SoftwareSerial &serial, HardwareSerial &serialOut){
 
+    
+    //while (serial.available() > 0){
+    //    inChar = serial.read();
+    //    serialOut.write(inChar+"\n");      
+    //}
+    return true;
+
+}
+
+boolean AGPSMessage::readFromSerial(SoftwareSerial &serial, HardwareSerial &serialOut){
+    
     setDefaultValue();
 
     while (serial.available() > 0){
 
         inChar = serial.read();
+        serialOut.write(inChar);
+        serialOut.write("\n");
         if(index < maxInputChar){
             setCharMsg(index, inChar);
         }else
@@ -58,6 +71,27 @@ boolean AGPSMessage::readFromSerial(SoftwareSerial &serial){
     }
 
     return true;
+
+}
+
+boolean AGPSMessage::readFromSerial(SoftwareSerial &serial){
+
+    setDefaultValue();
+
+    while (serial.available() > 0){
+
+        inChar = serial.read();
+        if(index < maxInputChar){
+            setCharMsg(index, inChar);
+        }else
+        {            
+            return true;
+        }
+                
+        index++;
+    }
+
+    return false;
 
 }
 

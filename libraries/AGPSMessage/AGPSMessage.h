@@ -25,11 +25,14 @@
 class AGPSMessage
 {
   public:
-    AGPSMessage();
-    AGPSMessage(char inputChar);
+    
     void setCharMsg(byte index, char value);    
     boolean readFromSerial(SoftwareSerial &serial);
+    boolean readFromSerial(SoftwareSerial &serial, HardwareSerial &serialOut);
     boolean readFromSerial(HardwareSerial &serial);    
+
+    boolean rFS(SoftwareSerial &serial, HardwareSerial &serialOut);
+    
     char paramCode[3];
     byte paramValueType;
     char paramValue[10];
@@ -38,6 +41,7 @@ class AGPSMessage
 
   private:
     void setDefaultValue();
+    
     char inChar;
     byte index, count;
     const byte maxInputChar = 20;

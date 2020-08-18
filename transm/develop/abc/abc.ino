@@ -1,6 +1,6 @@
 
 #include <SoftwareSerial.h>
-#include "AGPSMessage.h"
+#include <AGPSMessage.h>
 
 #define rxPin 2
 #define txPin 3
@@ -37,30 +37,6 @@ void setup()
 }
 
 
-char Comp(char* This) {
-    while (btSerial.available() > 0) // Don't read unless
-                                   // there you know there is data
-    {
-        if(index < 19) // One less than the size of the array
-        {
-            inChar = btSerial.read(); // Read a character
-            inData[index] = inChar; // Store it
-            index++; // Increment where to write next
-            inData[index] = '\0'; // Null terminate the string
-        }
-    }
-
-    if (strcmp(inData,This)  == 0) {
-        for (int i=0;i<19;i++) {
-            inData[i]=0;
-        }
-        index=0;
-        return(0);
-    }
-    else {
-        return(1);
-    }
-}
 
 void loop() // run over and over
 {
@@ -69,9 +45,6 @@ void loop() // run over and over
   //if (Serial.available())
   //  btSerial.write(Serial.read());
   
-  //if (btSerial.available() && Comp("ciao\n")==0) {
-  //      Serial.write("Ricevuta stringa: Ciao\n");
-  //}
 
   //if (btSerial.available()){
   //  while (btSerial.available() > 0){
@@ -86,11 +59,20 @@ void loop() // run over and over
   //  Serial.println(inData);
   //  index = 0;        
   //}
-  if (exchMsg.readFromSerial(btSerial)){
-    Serial.write(exchMsg.paramCode+F("\n"));      
-    Serial.write(exchMsg.paramCode+F("\n"));
+  
+  delay(500);
+  
+  if(exchMsg.readFromSerial(btSerial)) {
+    
+    Serial.write(exchMsg.paramCode);      
+    Serial.write("\n");      
+    Serial.write(exchMsg.paramValue);
+  
   }
 
-
+  //if(exchMsg.rFS(btSerial, Serial)){
+  //  Serial.write("OK\n");      
+  //  delay(500);
+  //}
 
 }
