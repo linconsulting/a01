@@ -1,14 +1,17 @@
 
 #include <SoftwareSerial.h>
+#include "AGPSMessage.h"
 
 #define rxPin 2
 #define txPin 3
 
-SoftwareSerial mySerial =  SoftwareSerial(rxPin, txPin);
+SoftwareSerial btSerial =  SoftwareSerial(rxPin, txPin);
 
-char inData[20]; // Allocate some space for the string
-char inChar=-1; // Where to store the character read
-byte index = 0; // Index into array; where to store the character
+//char inData[20]; // Allocate some space for the string
+//char inChar=-1; // Where to store the character read
+//byte index = 0; // Index into array; where to store the character
+
+AGPSMessage exchMsg = AGPSMessage();
 
 
 void setup()
@@ -25,8 +28,8 @@ void setup()
 
   
   //the SoftwareSerial port:  
-  mySerial.begin(9600);
-  mySerial.println(F("Abc started."));
+  btSerial.begin(9600);
+  btSerial.println(F("Abc started."));
 
   Serial.println(F("Setup avvenuto."));
 
@@ -35,12 +38,12 @@ void setup()
 
 
 char Comp(char* This) {
-    while (mySerial.available() > 0) // Don't read unless
+    while (btSerial.available() > 0) // Don't read unless
                                    // there you know there is data
     {
         if(index < 19) // One less than the size of the array
         {
-            inChar = mySerial.read(); // Read a character
+            inChar = btSerial.read(); // Read a character
             inData[index] = inChar; // Store it
             index++; // Increment where to write next
             inData[index] = '\0'; // Null terminate the string
@@ -61,19 +64,20 @@ char Comp(char* This) {
 
 void loop() // run over and over
 {
-  if (mySerial.available())
-      Serial.write(mySerial.read());      
-  if (Serial.available())
-    mySerial.write(Serial.read());
-  //if (mySerial.available() && Comp("ciao\n")==0) {
+  //if (btSerial.available())
+  //    Serial.write(btSerial.read());      
+  //if (Serial.available())
+  //  btSerial.write(Serial.read());
+  
+  //if (btSerial.available() && Comp("ciao\n")==0) {
   //      Serial.write("Ricevuta stringa: Ciao\n");
   //}
 
-  //if (mySerial.available()){
-  //  while (mySerial.available() > 0){
+  //if (btSerial.available()){
+  //  while (btSerial.available() > 0){
   //    if(index < 19) // One less than the size of the array
   //      {
-  //          inChar = mySerial.read(); // Read a character
+  //          inChar = btSerial.read(); // Read a character
   //          inData[index] = inChar; // Store it
   //          index++; // Increment where to write next            
   //          inData[index] = '\0'; // Null terminate the string
@@ -82,6 +86,11 @@ void loop() // run over and over
   //  Serial.println(inData);
   //  index = 0;        
   //}
+  if (exchMsg.readFromSerial(btSerial)){
+    Serial.write(exchMsg.paramCode+F("\n"));      
+    Serial.write(exchMsg.paramCode+F("\n"));
+  }
+
 
 
 }
