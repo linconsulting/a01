@@ -12,7 +12,7 @@ SoftwareSerial btSerial =  SoftwareSerial(rxPin, txPin);
 //byte index = 0; // Index into array; where to store the character
 
 AGPSMessage exchMsg = AGPSMessage();
-
+char x = ' ';
 
 void setup()
 {
@@ -45,30 +45,42 @@ void loop() // run over and over
   //if (Serial.available())
   //  btSerial.write(Serial.read());
   
+      
+    exchMsg.readFromSerial(btSerial, Serial);
 
-  //if (btSerial.available()){
-  //  while (btSerial.available() > 0){
-  //    if(index < 19) // One less than the size of the array
-  //      {
-  //          inChar = btSerial.read(); // Read a character
-  //          inData[index] = inChar; // Store it
-  //          index++; // Increment where to write next            
-  //          inData[index] = '\0'; // Null terminate the string
-  //      }
-  //  }
-  //  Serial.println(inData);
-  //  index = 0;        
-  //}
-  
-  delay(500);
-  
-  if(exchMsg.readFromSerial(btSerial)) {
     
-    Serial.write(exchMsg.paramCode);      
-    Serial.write("\n");      
-    Serial.write(exchMsg.paramValue);
+    if(exchMsg.paramCode[0] != x){
+
+      x = exchMsg.paramCode[0];
+
+      Serial.write("\n");
+
+      for(int i = 0; i < 3; i++){
+        
+        Serial.write(exchMsg.paramCode[i]);      
+
+      }
+      
+      Serial.write("\n");      
+      
+      for(int j = 0; j < 10; j++){
+        
+        Serial.write(exchMsg.paramValue[j]);
+      
+      }
+      
+
+      delay(500);
+
+    }
+    
+           
+      
+      
+
   
-  }
+  
+  
 
   //if(exchMsg.rFS(btSerial, Serial)){
   //  Serial.write("OK\n");      

@@ -53,24 +53,26 @@ boolean AGPSMessage::rFS(SoftwareSerial &serial, HardwareSerial &serialOut){
 
 boolean AGPSMessage::readFromSerial(SoftwareSerial &serial, HardwareSerial &serialOut){
     
-    setDefaultValue();
+    
+    if(serial.available() > 0){
+        setDefaultValue();
+    }
 
     while (serial.available() > 0){
-
+        
         inChar = serial.read();
-        serialOut.write(inChar);
-        serialOut.write("\n");
-        if(index < maxInputChar){
+        
+        if(inChar == '\0' || index >= 20){
+            return true;
+        }
+        else if(index < 20){
             setCharMsg(index, inChar);
-        }else
-        {
-            break;
         }
                 
         index++;
     }
-
-    return true;
+    
+    return false;
 
 }
 
