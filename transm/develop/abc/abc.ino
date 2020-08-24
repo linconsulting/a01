@@ -46,40 +46,28 @@ void loop() // run over and over
   //  btSerial.write(Serial.read());
   
       
-    exchMsg.readFromSerial(btSerial, Serial);
-
-    
-    if(exchMsg.paramCode[0] != x){
-
-      x = exchMsg.paramCode[0];
-
+    if(exchMsg.readFromSerial(btSerial, Serial)){
+      
       Serial.write("\n");
 
       for(int i = 0; i < 3; i++){
-        
         Serial.write(exchMsg.paramCode[i]);      
-
       }
       
       Serial.write("\n");      
-      
-      for(int j = 0; j < 10; j++){
-        
-        Serial.write(exchMsg.paramValue[j]);
-      
-      }
-      
 
-      delay(500);
+      for(int j = 0; j < 10; j++){        
+        Serial.write(exchMsg.paramValue[j]);
+      }
+
+      Serial.write("\n");      
+
+      Serial.write(exchMsg.paramValueIsComplete + '0');
+
 
     }
-    
-           
-      
-      
 
-  
-  
+    
   
 
   //if(exchMsg.rFS(btSerial, Serial)){

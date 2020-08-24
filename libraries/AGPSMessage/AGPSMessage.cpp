@@ -58,21 +58,26 @@ boolean AGPSMessage::readFromSerial(SoftwareSerial &serial, HardwareSerial &seri
         setDefaultValue();
     }
 
+    boolean vRet = false;
+
     while (serial.available() > 0){
         
         inChar = serial.read();
         
-        if(inChar == '\0' || index >= 20){
-            return true;
+        if(inChar == '\0' || index > maxInputChar){
+            vRet = true;
         }
-        else if(index < 20){
+        else if(index <= maxInputChar){
             setCharMsg(index, inChar);
+            vRet = true;
         }
-                
+
+        delay(2);                
         index++;
+        vRet = true;
     }
     
-    return false;
+    return vRet;
 
 }
 
@@ -123,6 +128,7 @@ void AGPSMessage::setCharMsg(byte index, char value){
     if(index < sizeof(paramCode))   // <3
     {            
         paramCode[index] = value;        
+        paramCode[index+1] = '\0';        
     }
 
     if(index == sizeof(paramCode)) // 3
@@ -133,6 +139,7 @@ void AGPSMessage::setCharMsg(byte index, char value){
     if(index > sizeof(paramCode) && index <= (sizeof(paramCode)+sizeof(paramValue)) ) //<= 13
     {
         paramValue[count] = value;
+        paramValue[count+1] = '\0';
         count++;            
     }
 

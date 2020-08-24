@@ -44,7 +44,7 @@ class AGPSMessage
     
     char inChar;
     byte index, count;
-    const byte maxInputChar = 20;
+    const byte maxInputChar = 16;
 };
 
 #endif
