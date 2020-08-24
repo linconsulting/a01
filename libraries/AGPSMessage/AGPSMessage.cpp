@@ -64,17 +64,13 @@ boolean AGPSMessage::readFromSerial(SoftwareSerial &serial, HardwareSerial &seri
         
         inChar = serial.read();
         
-        if(inChar == '\0' || index > maxInputChar){
+        if(index <= maxInputChar || inChar == '\0'){
+            setCharMsg(index, inChar);            
             vRet = true;
-        }
-        else if(index <= maxInputChar){
-            setCharMsg(index, inChar);
-            vRet = true;
-        }
+        }        
 
         delay(2);                
-        index++;
-        vRet = true;
+        index++;        
     }
     
     return vRet;

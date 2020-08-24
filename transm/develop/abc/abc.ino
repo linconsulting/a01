@@ -39,13 +39,8 @@ void setup()
 
 
 void loop() // run over and over
-{
-  //if (btSerial.available())
-  //    Serial.write(btSerial.read());      
-  //if (Serial.available())
-  //  btSerial.write(Serial.read());
-  
-      
+{      
+    
     if(exchMsg.readFromSerial(btSerial, Serial)){
       
       Serial.write("\n");
@@ -56,23 +51,27 @@ void loop() // run over and over
       
       Serial.write("\n");      
 
+      Serial.write(exchMsg.paramValueType + '0');
+
+      Serial.write("\n");      
+
       for(int j = 0; j < 10; j++){        
         Serial.write(exchMsg.paramValue[j]);
       }
 
       Serial.write("\n");      
 
+      Serial.write(exchMsg.paramValueCommaIndex + '0');
+
+      Serial.write("\n"); 
+
       Serial.write(exchMsg.paramValueIsComplete + '0');
 
 
     }
 
-    
-  
+    delay(10);
 
-  //if(exchMsg.rFS(btSerial, Serial)){
-  //  Serial.write("OK\n");      
-  //  delay(500);
-  //}
+  
 
 }
