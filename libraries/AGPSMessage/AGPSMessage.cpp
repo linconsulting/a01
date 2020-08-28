@@ -51,6 +51,17 @@ boolean AGPSMessage::rFS(SoftwareSerial &serial, HardwareSerial &serialOut){
 
 }
 
+
+boolean AGPSMessage::writeOkToSerial(SoftwareSerial &serial){
+    
+    byte nByteBuff = serial.println(F("E000000000000000"));
+    
+    return (nByteBuff > 0) ? true : false;
+    
+    
+}
+
+
 boolean AGPSMessage::readFromSerial(SoftwareSerial &serial, HardwareSerial &serialOut){
     
     
@@ -79,43 +90,51 @@ boolean AGPSMessage::readFromSerial(SoftwareSerial &serial, HardwareSerial &seri
 
 boolean AGPSMessage::readFromSerial(SoftwareSerial &serial){
 
-    setDefaultValue();
-
-    while (serial.available() > 0){
-
-        inChar = serial.read();
-        if(index < maxInputChar){
-            setCharMsg(index, inChar);
-        }else
-        {            
-            return true;
-        }
-                
-        index++;
+    if(serial.available() > 0){
+        setDefaultValue();
     }
 
-    return false;
+    boolean vRet = false;
+
+    while (serial.available() > 0){
+        
+        inChar = serial.read();
+        
+        if(index <= maxInputChar || inChar == '\0'){
+            setCharMsg(index, inChar);            
+            vRet = true;
+        }        
+
+        delay(2);                
+        index++;        
+    }
+    
+    return vRet;
 
 }
 
 boolean AGPSMessage::readFromSerial(HardwareSerial &serial){
 
-    setDefaultValue();
-
-    while (serial.available() > 0){
-
-        inChar = serial.read();
-        if(index < maxInputChar){
-            setCharMsg(index, inChar);
-        }else
-        {
-            break;
-        }
-                
-        index++;
+    if(serial.available() > 0){
+        setDefaultValue();
     }
 
-    return true;
+    boolean vRet = false;
+
+    while (serial.available() > 0){
+        
+        inChar = serial.read();
+        
+        if(index <= maxInputChar || inChar == '\0'){
+            setCharMsg(index, inChar);            
+            vRet = true;
+        }        
+
+        delay(2);                
+        index++;        
+    }
+    
+    return vRet;
 
 }
 

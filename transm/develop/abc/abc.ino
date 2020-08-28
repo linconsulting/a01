@@ -67,6 +67,9 @@ void loop() // run over and over
 
       Serial.write(exchMsg.paramValueIsComplete + '0');
 
+      boolean r = exchMsg.writeOkToSerial(btSerial);
+
+      Serial.write(r + '0');
 
     }
 

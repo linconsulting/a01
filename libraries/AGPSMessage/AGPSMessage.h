@@ -29,7 +29,9 @@ class AGPSMessage
     void setCharMsg(byte index, char value);    
     boolean readFromSerial(SoftwareSerial &serial);
     boolean readFromSerial(SoftwareSerial &serial, HardwareSerial &serialOut);
-    boolean readFromSerial(HardwareSerial &serial);    
+    boolean readFromSerial(HardwareSerial &serial);
+    
+    boolean writeOkToSerial(SoftwareSerial &serial);            
 
     boolean rFS(SoftwareSerial &serial, HardwareSerial &serialOut);
     
