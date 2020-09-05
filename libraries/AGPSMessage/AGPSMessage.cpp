@@ -62,34 +62,9 @@ boolean AGPSMessage::writeOkToSerial(SoftwareSerial &serial){
 }
 
 
-boolean AGPSMessage::readFromSerial(SoftwareSerial &serial, HardwareSerial &serialOut){
-    
-    
-    if(serial.available() > 0){
-        setDefaultValue();
-    }
-
-    boolean vRet = false;
-
-    while (serial.available() > 0){
-        
-        inChar = serial.read();
-        
-        if(index <= maxInputChar || inChar == '\0'){
-            setCharMsg(index, inChar);            
-            vRet = true;
-        }        
-
-        delay(2);                
-        index++;        
-    }
-    
-    return vRet;
-
-}
-
 boolean AGPSMessage::readFromSerial(SoftwareSerial &serial){
-
+    
+    
     if(serial.available() > 0){
         setDefaultValue();
     }
@@ -112,6 +87,8 @@ boolean AGPSMessage::readFromSerial(SoftwareSerial &serial){
     return vRet;
 
 }
+
+
 
 boolean AGPSMessage::readFromSerial(HardwareSerial &serial){
 

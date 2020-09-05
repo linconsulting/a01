@@ -5,6 +5,26 @@
 #define rxPin 2
 #define txPin 3
 
+#define E00 165
+#define E01 166
+#define S01 180
+#define G01 168
+#define S02 181
+#define G02 169
+#define S03 182
+#define G03 170
+#define S04 183
+#define G04 171
+#define S05 184
+#define G05 172
+#define S06 185
+#define G06 173
+#define S07 186
+#define G07 174
+#define S08 187
+#define G08 175
+
+
 SoftwareSerial btSerial =  SoftwareSerial(rxPin, txPin);
 
 //char inData[20]; // Allocate some space for the string
@@ -36,12 +56,27 @@ void setup()
 
 }
 
+boolean updateVars(AGPSMessage &msg){
+
+  int strCode = 0;
+  for(int i = 0; i < 3; i++){
+    strCode += msg.paramCode[i];      
+  }
+  
+  if(strCode == S01){
+    return true;
+  }
+  
+  return false;
+
+}
+
 
 
 void loop() // run over and over
 {      
     
-    if(exchMsg.readFromSerial(btSerial, Serial)){
+    if(exchMsg.readFromSerial(btSerial)){
       
       Serial.write("\n");
 
@@ -70,6 +105,10 @@ void loop() // run over and over
       boolean r = exchMsg.writeOkToSerial(btSerial);
 
       Serial.write(r + '0');
+
+      Serial.write("\n"); 
+
+      Serial.write(updateVars(exchMsg) + '0');
 
     }
 
