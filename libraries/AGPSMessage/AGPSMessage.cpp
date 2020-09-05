@@ -147,3 +147,29 @@ void AGPSMessage::setCharMsg(byte index, char value){
 
 
 }
+
+unsigned long AGPSMessage::getValueInUL(){
+
+    return strtoul(paramValue,NULL,0);
+
+}
+
+byte AGPSMessage::getValueInByte(){
+
+    return (byte)strtoul(paramValue,NULL,0);
+
+}
+
+float AGPSMessage::getValueInFloat(){
+
+    float vRet = 0.0;
+    int cntExp = -paramValueCommaIndex;
+
+    for(int i = sizeof(paramValue)-1; i >= 0; i--){
+        vRet += (paramValue[i]-'0')*pow(10,cntExp);
+        cntExp++;
+    }
+
+    return vRet;
+
+}

@@ -33,6 +33,11 @@ class AGPSMessage
     boolean writeOkToSerial(SoftwareSerial &serial);            
 
     boolean rFS(SoftwareSerial &serial, HardwareSerial &serialOut);
+
+    byte getValueInByte();
+    unsigned long getValueInUL();
+    float getValueInFloat();
+    
     
     char paramCode[3];
     byte paramValueType;

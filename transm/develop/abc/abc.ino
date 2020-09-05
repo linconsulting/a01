@@ -59,14 +59,67 @@ void setup()
 boolean updateVars(AGPSMessage &msg){
 
   int strCode = 0;
-  for(int i = 0; i < 3; i++){
+  for(int i = 0; i < sizeof(msg.paramCode); i++){
     strCode += msg.paramCode[i];      
   }
   
-  if(strCode == S01){
-    return true;
+  switch (strCode) {
+    case S01:
+
+      msg.getValueInUL();
+      
+      return true;
+      break;
+    case G01:
+      return true;
+      break;
+    case S02:
+      return true;
+      break;
+    case G02:
+      return true;
+      break;    
+    case S03:
+      return true;
+      break;
+    case G03:
+      return true;
+      break;
+    case S04:
+      return true;
+      break;
+    case G04:
+      return true;
+      break;
+    case S05:
+      return true;
+      break;
+    case G05:
+      return true;
+      break;
+    case S06:
+      return true;
+      break;
+    case G06:
+      return true;
+      break;
+    case S07:
+      return true;
+      break;
+    case G07:
+      return true;
+      break;
+    case S08:
+      return true;
+      break;
+    case G08:
+      return true;
+      break;
+    default:
+      return false;
+      break;
   }
-  
+
   return false;
 
 }
