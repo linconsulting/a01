@@ -65,8 +65,9 @@ boolean updateVars(AGPSMessage &msg){
   
   switch (strCode) {
     case S01:
-
-      msg.getValueInUL();
+      
+      Serial.println(msg.getValueInFloat());
+      //da inviare ad arduino ev controller
       
       return true;
       break;

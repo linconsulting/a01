@@ -150,13 +150,13 @@ void AGPSMessage::setCharMsg(byte index, char value){
 
 unsigned long AGPSMessage::getValueInUL(){
 
-    return strtoul(paramValue,NULL,0);
-
+    return strtoul(paramValue,NULL,10);
+    
 }
 
 byte AGPSMessage::getValueInByte(){
 
-    return (byte)strtoul(paramValue,NULL,0);
+    return (byte)strtoul(paramValue,NULL,10);
 
 }
 
