@@ -6,7 +6,7 @@
 
 
 SoftwareSerial btSerial =  SoftwareSerial(rxPin, txPin);
-//AGPSMessage exchMsg = AGPSMessage();
+AGPSMessage exchMsg = AGPSMessage();
 int incomingByte;   
 
 void setup()
@@ -34,18 +34,28 @@ void setup()
 void loop() // run over and over
 {       
     
-    while (btSerial.available() > 0){
-        
-        incomingByte = btSerial.read();       
-        
-        Serial.write(incomingByte);
-        //Serial.write("\n");
-        
-        
-        delay(2);                
-        
-    }
+    //while (btSerial.available() > 0){
+    //    
+    //    incomingByte = btSerial.read();       
+    //    
+    //    // say what you got:
+    //    Serial.print("I received: ");
+    //    Serial.println(incomingByte, DEC);
+    //    Serial.println(incomingByte, BIN);
+    //    
+    //    
+    //    delay(2);                
+    //    
+    //}
     
+    if(exchMsg.readFromSerial(btSerial)){
+      
+      Serial.write("\n"); 
+
+      Serial.write(exchMsg.paramValueIsComplete + '0');
+
+      Serial.write("\n"); 
+    }
 
     delay(10);
  

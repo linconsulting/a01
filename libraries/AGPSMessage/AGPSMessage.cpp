@@ -26,7 +26,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "string.h"
 
 
-
 void AGPSMessage::setDefaultValue(){
 
     memset(paramCode, ' ', sizeof(paramCode));  
@@ -37,6 +36,7 @@ void AGPSMessage::setDefaultValue(){
 
     count = 0;
     index = 0;
+    msgLength = 0;
     
 }
 
@@ -75,14 +75,19 @@ boolean AGPSMessage::readFromSerial(SoftwareSerial &serial){
         
         inChar = serial.read();
         
-        if(index <= maxInputChar || inChar == '\0'){
-            setCharMsg(index, inChar);            
+        if(index < maxInputByte || inChar == '\0'){
+            iMsg[index] = inChar;
             vRet = true;
         }        
 
         delay(2);                
         index++;        
     }
+
+    if(vRet){
+        return decodeMsg();
+    }
+
     
     return vRet;
 
@@ -112,6 +117,67 @@ boolean AGPSMessage::readFromSerial(HardwareSerial &serial){
     }
     
     return vRet;
+
+}
+
+byte AGPSMessage::decodeByte(){
+
+    byte byteDecoded = 0;
+    
+    for (size_t i = 0; i < 8; i++)
+    {
+        if(bitRead(iMsg[index],i)){
+            bitSet(byteDecoded,i);
+        }        
+        
+    }
+
+    return byteDecoded;
+
+}
+
+boolean AGPSMessage::decodeMsg(){
+
+    
+    byte byteDecoded = 0;
+    boolean nextStepAllowed = false;
+
+    //primo e ultimo byte
+    index = 0;
+    byteDecoded = decodeByte();
+
+    if(byteDecoded == 1){
+        nextStepAllowed = true;
+    }
+
+    if(nextStepAllowed){
+
+        index = sizeof(iMsg) - 1;
+
+        while (byteDecoded == 0 && index > 0)
+        {
+            byteDecoded = 0;
+            byteDecoded = decodeByte();
+            index--;
+        }
+
+        if(byteDecoded == 4){
+            nextStepAllowed = true;
+            msgLength = index + 2;
+        }else{
+            nextStepAllowed = false;
+        }   
+        
+    }
+    
+    if(nextStepAllowed){
+        //lettera codice parametro
+    }
+    
+        
+    
+    
+    return false;
 
 }
 
