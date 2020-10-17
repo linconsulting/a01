@@ -153,10 +153,10 @@ boolean AGPSMessage::decodeMsg(){
     if(nextStepAllowed){
 
         index = sizeof(iMsg) - 1;
+        byteDecoded = 0;
 
         while (byteDecoded == 0 && index > 0)
-        {
-            byteDecoded = 0;
+        {            
             byteDecoded = decodeByte();
             index--;
         }
