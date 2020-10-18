@@ -42,16 +42,21 @@ class AGPSMessage
     
     char paramCode[3];
     byte paramValueType;
+    byte paramValueSign;
+    byte paramValueLength;
     char paramValue[10];
     byte paramValueCommaIndex;
-    byte paramValueIsComplete;
+    bool paramValueIsComplete;
+    bool paramValueIsNumeric;
+    byte byteDecoded;
 
     byte iMsg[11];
 
   private:
     void setDefaultValue();    
     boolean decodeMsg();   
-    byte decodeByte(); 
+    byte decodeByte();
+    byte decodeBits(byte bitFrom, byte bitTo); 
 
     char inChar;
     byte index, count, msgLength;

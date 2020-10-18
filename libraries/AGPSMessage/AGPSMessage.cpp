@@ -120,11 +120,11 @@ boolean AGPSMessage::readFromSerial(HardwareSerial &serial){
 
 }
 
-byte AGPSMessage::decodeByte(){
+void AGPSMessage::decodeByte(){
 
-    byte byteDecoded = 0;
+    byteDecoded = 0;
     
-    for (size_t i = 0; i < 8; i++)
+    for (byte i = 0; i < 8; i++)
     {
         if(bitRead(iMsg[index],i)){
             bitSet(byteDecoded,i);
@@ -132,24 +132,78 @@ byte AGPSMessage::decodeByte(){
         
     }
 
-    return byteDecoded;
 
 }
 
-boolean AGPSMessage::decodeMsg(){
+void AGPSMessage::decodeBits(byte bitFrom=0, byte bitTo=8){
 
+    byteDecoded = 0;
+    byte j = 0;
     
-    byte byteDecoded = 0;
-    boolean nextStepAllowed = false;
-
-    //primo e ultimo byte
-    index = 0;
-    byteDecoded = decodeByte();
-
-    if(byteDecoded == 1){
-        nextStepAllowed = true;
+    for (byte i = bitFrom; i < bitTo; i++)
+    {
+        if(bitRead(iMsg[index],i)){
+            bitSet(byteDecoded,j);
+        }        
+        j++;
     }
 
+    
+}
+
+
+boolean AGPSMessage::decodeMsg(){
+
+    boolean nextStepAllowed = false;
+
+    //index è l'indice del byte da decodificare
+    //nell'array iMsg
+    index = 0;
+
+    //inizio decodifica primo byte    
+    if(bitRead(iMsg[index],7)){
+        nextStepAllowed = true;
+    }
+    
+    paramValueIsComplete = true;
+    if(bitRead(iMsg[index],6)){
+        paramValueIsComplete = false;        
+    }
+    
+    paramValueIsNumeric = true;
+    if(bitRead(iMsg[index],5)){
+        paramValueIsNumeric = false;        
+    }
+
+    if(!paramValueIsNumeric){
+        paramValueType = 0;
+        paramValueSign = 0;
+    }else{
+        decodeBits(1,5);
+        if(byteDecoded >= 0 && byteDecoded <= 3){
+            paramValueType = byteDecoded;
+        }        
+        paramValueSign = bitRead(iMsg[index],0);        
+    }
+    //fine decodifica primo byte
+
+    //inizio decodifica secondo byte
+    index++;
+    if(nextStepAllowed){
+        decodeBits(0,5);
+        if(byteDecoded >= 0 && byteDecoded <= 9){
+            paramValueLength = byteDecoded;
+        }
+        decodeBits(5);
+        if(byteDecoded >= 0 && byteDecoded <= 9){
+            paramValueCommaIndex = byteDecoded;
+        }
+    }
+    //fine decodifica secondo byte
+
+
+    //da completare....
+    
     if(nextStepAllowed){
 
         index = sizeof(iMsg) - 1;
