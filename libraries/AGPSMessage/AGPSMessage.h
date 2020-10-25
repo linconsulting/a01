@@ -40,7 +40,7 @@ class AGPSMessage
     float getValueInFloat();
     
     
-    char paramCode[3];
+    byte paramCode[2];    
     byte paramValueType;
     byte paramValueSign;
     byte paramValueLength;
@@ -48,6 +48,7 @@ class AGPSMessage
     byte paramValueCommaIndex;
     bool paramValueIsComplete;
     bool paramValueIsNumeric;
+    bool paramValueHasPayload;
     byte byteDecoded;
 
     byte iMsg[11];
@@ -56,7 +57,7 @@ class AGPSMessage
     void setDefaultValue();    
     boolean decodeMsg();   
     byte decodeByte();
-    byte decodeBits(byte bitFrom, byte bitTo); 
+    byte decodeBits(byte bitFrom, byte bitTo, byte bitSetFrom); 
 
     char inChar;
     byte index, count, msgLength;

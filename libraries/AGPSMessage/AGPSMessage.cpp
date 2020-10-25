@@ -135,10 +135,10 @@ void AGPSMessage::decodeByte(){
 
 }
 
-void AGPSMessage::decodeBits(byte bitFrom=0, byte bitTo=8){
+void AGPSMessage::decodeBits(byte bitFrom=0, byte bitTo=8, byte bitSetFrom = 0){
 
     byteDecoded = 0;
-    byte j = 0;
+    byte j = bitSetFrom;
     
     for (byte i = bitFrom; i < bitTo; i++)
     {
@@ -160,18 +160,18 @@ boolean AGPSMessage::decodeMsg(){
     //nell'array iMsg
     index = 0;
 
-    //inizio decodifica primo byte    
-    if(bitRead(iMsg[index],7)){
+    //inizio decodifica primo byte, primo bit (lsb)
+    if(bitRead(iMsg[index],0)){
         nextStepAllowed = true;
     }
     
     paramValueIsComplete = true;
-    if(bitRead(iMsg[index],6)){
+    if(bitRead(iMsg[index],1)){
         paramValueIsComplete = false;        
     }
     
     paramValueIsNumeric = true;
-    if(bitRead(iMsg[index],5)){
+    if(bitRead(iMsg[index],2)){
         paramValueIsNumeric = false;        
     }
 
@@ -179,17 +179,24 @@ boolean AGPSMessage::decodeMsg(){
         paramValueType = 0;
         paramValueSign = 0;
     }else{
-        decodeBits(1,5);
+        decodeBits(3,5);
         if(byteDecoded >= 0 && byteDecoded <= 3){
             paramValueType = byteDecoded;
         }        
         paramValueSign = bitRead(iMsg[index],0);        
     }
+    
+    paramValueHasPayload = false;
+    if(bitRead(iMsg[index],6)){
+        paramValueHasPayload = true;        
+    }
+
+    //bit 8 msb nn contiene informazione
     //fine decodifica primo byte
 
     //inizio decodifica secondo byte
     index++;
-    if(nextStepAllowed){
+    if(paramValueHasPayload){
         decodeBits(0,5);
         if(byteDecoded >= 0 && byteDecoded <= 9){
             paramValueLength = byteDecoded;
@@ -198,9 +205,28 @@ boolean AGPSMessage::decodeMsg(){
         if(byteDecoded >= 0 && byteDecoded <= 9){
             paramValueCommaIndex = byteDecoded;
         }
+    }else{
+        paramValueLength = 0;
+        paramValueCommaIndex = 0;
     }
     //fine decodifica secondo byte
 
+
+    //inizio decodifica terzo e quarto byte
+    index++;    
+    decodeBits(0,4);    
+    paramCode[0] = byteDecoded;
+    paramCode[1] = 0;
+    
+    decodeBits(4,8,4);    
+    paramCode[1] = byteDecoded;
+    //fine decodifica terzo byte
+
+    //inizio decodifica quarto byte
+    if(paramValueLength > 0){
+
+    }
+    //fine decodifica quarto byte
 
     //da completare....
     
