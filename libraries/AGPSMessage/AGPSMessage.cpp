@@ -233,34 +233,44 @@ boolean AGPSMessage::decodeMsg(){
     
     //fine decodifica terzo e quarto byte
 
-    //da completare....
+    //inizio decodifica bytes del valore passato
+    index++;
+    decodeBits();
+
+    if(paramValueLength == 0){
+        //controllo il byte di chiusura        
+        if(byteDecoded == 4){
+            return true;
+        }else
+        {
+            return false;
+        }
+        
+    }
     
-    if(nextStepAllowed){
+    if(paramValueIsNumeric){
 
-        index = sizeof(iMsg) - 1;
-        byteDecoded = 0;
+        //da completare....
 
-        while (byteDecoded == 0 && index > 0)
-        {            
-            byteDecoded = decodeByte();
-            index--;
+    }else
+    {
+        for (byte i = 0; i < paramValueLength; i++)
+        {
+            paramValue[i] = byteDecoded;
+            paramValue[i+1] = '\0';
+            index++;
+            decodeBits();
         }
 
         if(byteDecoded == 4){
-            nextStepAllowed = true;
-            msgLength = index + 2;
-        }else{
-            nextStepAllowed = false;
-        }   
+            return true;
+        }else
+        {
+            return false;
+        }
+
         
     }
-    
-    if(nextStepAllowed){
-        //lettera codice parametro
-    }
-    
-        
-    
     
     return false;
 
