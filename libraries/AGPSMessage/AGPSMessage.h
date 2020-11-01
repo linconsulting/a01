@@ -40,7 +40,8 @@ class AGPSMessage
     float getValueInFloat();
     
     
-    byte paramCode[2];    
+    byte paramCode;    
+    int paramCodeNumber;    
     byte paramValueType;
     byte paramValueSign;
     byte paramValueLength;

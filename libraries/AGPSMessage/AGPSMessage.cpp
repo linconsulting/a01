@@ -155,6 +155,7 @@ void AGPSMessage::decodeBits(byte bitFrom=0, byte bitTo=8, byte bitSetFrom = 0){
 boolean AGPSMessage::decodeMsg(){
 
     boolean nextStepAllowed = false;
+    byte bufferByte = 0;
 
     //index è l'indice del byte da decodificare
     //nell'array iMsg
@@ -214,19 +215,23 @@ boolean AGPSMessage::decodeMsg(){
 
     //inizio decodifica terzo e quarto byte
     index++;    
-    decodeBits(0,4);    
-    paramCode[0] = byteDecoded;
-    paramCode[1] = 0;
+    decodeBits();    
+    paramCode = byteDecoded;
+    index++; 
+    decodeBits();
+    bufferByte = byteDecoded;
     
-    decodeBits(4,8,4);    
-    paramCode[1] = byteDecoded;
-    //fine decodifica terzo byte
+    byteDecoded = paramCode;
+    paramCode = byteDecoded >> 4;
+    
+    byteDecoded <<= 4;    
+    paramCodeNumber = (byteDecoded >> 4) * 100; //prima cifra parametro    
+    paramCodeNumber += (bufferByte >> 4) * 10; //incremento con seconda cifra parametro
 
-    //inizio decodifica quarto byte
-    if(paramValueLength > 0){
-
-    }
-    //fine decodifica quarto byte
+    byteDecoded = bufferByte << 4;
+    paramCodeNumber += byteDecoded >> 4; //incremento con terza cifra parametro
+    
+    //fine decodifica terzo e quarto byte
 
     //da completare....
     
