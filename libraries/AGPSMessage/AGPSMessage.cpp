@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "AGPSMessage.h"
 //#include "defines.h"
 #include "string.h"
+//parity logica even: 1 pari 0 dispari
+#define parity(b) ((((((b)^(((b)<<4)|((b)>>4))) + 0x41) | 0x7C ) +2 ) & 0x80) 
 
 
 void AGPSMessage::setDefaultValue(){
@@ -37,6 +39,7 @@ void AGPSMessage::setDefaultValue(){
     count = 0;
     index = 0;
     msgLength = 0;
+    lsbIsNibble = false;
     
 }
 
@@ -120,6 +123,33 @@ boolean AGPSMessage::readFromSerial(HardwareSerial &serial){
 
 }
 
+
+boolean AGPSMessage::decodeMsg(){
+
+    //index è l'indice del byte da decodificare
+    //nell'array iMsg
+    index = 0;    
+    if(!decodeFirstByte()){
+        return false;
+    }
+        
+    decodeSecondByte();
+    decodeThirdFourthBytes();
+    decodeValue();
+
+    //controllo il byte di chiusura        
+    return checkEOM();    
+
+    //Ora bisogna rivedere le funzione getValue
+    //in base al fatto che i valori numerici non
+    //sono più char ma dei binari in dei nibble
+    
+    // rivedere ad esempio getValueInFloat
+    
+
+}
+
+
 void AGPSMessage::decodeByte(){
 
     byteDecoded = 0;
@@ -152,18 +182,12 @@ void AGPSMessage::decodeBits(byte bitFrom=0, byte bitTo=8, byte bitSetFrom = 0){
 }
 
 
-boolean AGPSMessage::decodeMsg(){
 
-    boolean nextStepAllowed = false;
-    byte bufferByte = 0;
-
-    //index è l'indice del byte da decodificare
-    //nell'array iMsg
-    index = 0;
+boolean AGPSMessage::decodeFirstByte(){
 
     //inizio decodifica primo byte, primo bit (lsb)
-    if(bitRead(iMsg[index],0)){
-        nextStepAllowed = true;
+    if(bitRead(iMsg[index],0) == 0){
+        return false;
     }
     
     paramValueIsComplete = true;
@@ -194,9 +218,14 @@ boolean AGPSMessage::decodeMsg(){
 
     //bit 8 msb nn contiene informazione
     //fine decodifica primo byte
+    
 
-    //inizio decodifica secondo byte
+}
+
+void AGPSMessage::decodeSecondByte(){
+    
     index++;
+
     if(paramValueHasPayload){
         decodeBits(0,5);
         if(byteDecoded >= 0 && byteDecoded <= 9){
@@ -210,10 +239,13 @@ boolean AGPSMessage::decodeMsg(){
         paramValueLength = 0;
         paramValueCommaIndex = 0;
     }
-    //fine decodifica secondo byte
 
+}
 
-    //inizio decodifica terzo e quarto byte
+void AGPSMessage::decodeThirdFourthBytes(){
+
+    byte bufferByte = 0;
+
     index++;    
     decodeBits();    
     paramCode = byteDecoded;
@@ -230,50 +262,59 @@ boolean AGPSMessage::decodeMsg(){
 
     byteDecoded = bufferByte << 4;
     paramCodeNumber += byteDecoded >> 4; //incremento con terza cifra parametro
-    
-    //fine decodifica terzo e quarto byte
 
-    //inizio decodifica bytes del valore passato
+}
+
+void AGPSMessage::decodeValue(){
+
     index++;
     decodeBits();
+    byte bufferByte = 0;
 
-    if(paramValueLength == 0){
-        //controllo il byte di chiusura        
-        if(byteDecoded == 4){
-            return true;
+    if(paramValueLength > 0){
+
+        bufferByte = !parity(paramValueIsNumeric);
+
+        if(paramValueIsNumeric){
+
+            bufferByte = paramValueLength / 2;
+            
+            if(bufferByte != 0){
+                lsbIsNibble = true;
+                bufferByte++;
+            }
+            
+
         }else
         {
-            return false;
+            bufferByte = paramValueLength;
         }
         
-    }
-    
-    if(paramValueIsNumeric){
-
-        //da completare....
-
-    }else
-    {
-        for (byte i = 0; i < paramValueLength; i++)
+        paramValue[0] = byteDecoded;
+        paramValue[1] = '\0';
+        
+        for (byte i = 1; i <= bufferByte; i++)
         {
-            paramValue[i] = byteDecoded;
-            paramValue[i+1] = '\0';
             index++;
             decodeBits();
+            paramValue[i] = byteDecoded;
+            paramValue[i+1] = '\0';
+            
         }
-
-        if(byteDecoded == 4){
-            return true;
-        }else
-        {
-            return false;
-        }
-
         
     }
-    
-    return false;
 
+
+}
+
+boolean AGPSMessage::checkEOM(){
+
+   if(lsbIsNibble){
+       byteDecoded <<= 4;    
+       byteDecoded >>= 4;
+   }
+   return byteDecoded == 4 ? true : false;
+    
 }
 
 void AGPSMessage::setCharMsg(byte index, char value){

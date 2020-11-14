@@ -45,23 +45,31 @@ class AGPSMessage
     byte paramValueType;
     byte paramValueSign;
     byte paramValueLength;
-    char paramValue[10];
+    char paramValue[9];
     byte paramValueCommaIndex;
     bool paramValueIsComplete;
     bool paramValueIsNumeric;
     bool paramValueHasPayload;
     byte byteDecoded;
 
-    byte iMsg[11];
+    byte iMsg[10];
 
   private:
     void setDefaultValue();    
+    void decodeSecondByte();
+    void decodeThirdFourthBytes();
+    void decodeValue();
+    
     boolean decodeMsg();   
+    boolean decodeFirstByte();
+
+    boolean checkEOM();   //end of message
     byte decodeByte();
     byte decodeBits(byte bitFrom, byte bitTo, byte bitSetFrom); 
 
     char inChar;
     byte index, count, msgLength;
+    bool lsbIsNibble;
     const byte maxInputChar = 16;
     const byte maxInputByte = 11;
 };
