@@ -12,8 +12,8 @@
                 "C:\\Users\\giacomo.solazzi\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.3\\**",
                 "C:\\Users\\giacomo.solazzi\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\**",
                 "C:\\Users\\giacomo\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.3\\**",
-                "C:\\Users\\giacomo\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\**"
-                
+                "C:\\Users\\giacomo\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\**",
+                "${workspaceFolder}/libraries/AGPSMessage"
             ],
             "defines": [
                 "_DEBUG",

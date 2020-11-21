@@ -16,38 +16,21 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 */
-#ifndef AGPSMessage_h
-#define AGPSMessage_h
+#ifndef AGPSMessageReceiver_h
+#define AGPSMessageReceiver_h
 
 #include "Arduino.h"
 #include <SoftwareSerial.h>
+#include <AGPSMessage.h>
 
-class AGPSMessage
+class AGPSMessageReceiver : public AGPSMessage
 {
   public:
     
     boolean readFromSerial(SoftwareSerial &serial);    
     boolean readFromSerial(HardwareSerial &serial);
-    
-    boolean writeOkToSerial(SoftwareSerial &serial);            
-
     boolean rFS(SoftwareSerial &serial, HardwareSerial &serialOut);
-
     float getValueInFloat();
-    
-    
-    byte paramCode;    
-    int paramCodeNumber;    
-    byte paramValueType;
-    byte paramValueSign;
-    byte paramValueLength;
-    char paramValue[9];
-    byte paramValueCommaIndex;
-    bool paramValueIsComplete;
-    bool paramValueIsNumeric;
-    bool paramValueHasPayload;
-    byte byteDecoded;
-
     
 
   private:
@@ -63,11 +46,7 @@ class AGPSMessage
     byte decodeByte();
     byte decodeBits(byte bitFrom, byte bitTo, byte bitSetFrom); 
 
-    byte iMsg[10];
-    int iByte;
-    byte index, msgLength;
-    bool lsbIsNibble;
-    const byte maxInputByte = 14;
+    
 };
 
 #endif

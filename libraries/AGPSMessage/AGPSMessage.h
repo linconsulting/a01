@@ -26,16 +26,6 @@ class AGPSMessage
 {
   public:
     
-    boolean readFromSerial(SoftwareSerial &serial);    
-    boolean readFromSerial(HardwareSerial &serial);
-    
-    boolean writeOkToSerial(SoftwareSerial &serial);            
-
-    boolean rFS(SoftwareSerial &serial, HardwareSerial &serialOut);
-
-    float getValueInFloat();
-    
-    
     byte paramCode;    
     int paramCodeNumber;    
     byte paramValueType;
@@ -48,20 +38,11 @@ class AGPSMessage
     bool paramValueHasPayload;
     byte byteDecoded;
 
-    
 
   private:
     void setDefaultValue();    
-    void decodeSecondByte();
-    void decodeThirdFourthBytes();
-    void decodeValue();
-    
-    boolean decodeMsg();   
-    boolean decodeFirstByte();
-
-    boolean checkEOM();   //end of message
-    byte decodeByte();
-    byte decodeBits(byte bitFrom, byte bitTo, byte bitSetFrom); 
+    void decodeByte();
+    void decodeBits(byte bitFrom, byte bitTo, byte bitSetFrom); 
 
     byte iMsg[10];
     int iByte;
