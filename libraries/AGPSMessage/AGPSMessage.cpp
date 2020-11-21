@@ -22,21 +22,16 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <Arduino.h>
 #include "AGPSMessage.h"
-//#include "defines.h"
-#include "string.h"
-//parity logica even: 1 pari 0 dispari
-#define parity(b) ((((((b)^(((b)<<4)|((b)>>4))) + 0x41) | 0x7C ) +2 ) & 0x80) 
+#define parity(b) ((((((b)^(((b)<<4)|((b)>>4))) + 0x41) | 0x7C ) +2 ) & 0x80) //parity logica even: 1 pari 0 dispari
 
 
 void AGPSMessage::setDefaultValue(){
 
-    memset(paramCode, ' ', sizeof(paramCode));  
     paramValueType = 255;
     memset(paramValue, ' ', sizeof(paramValue));  
     paramValueCommaIndex = 255;
     paramValueIsComplete = 255;
 
-    count = 0;
     index = 0;
     msgLength = 0;
     lsbIsNibble = false;
@@ -47,8 +42,8 @@ boolean AGPSMessage::rFS(SoftwareSerial &serial, HardwareSerial &serialOut){
 
     
     //while (serial.available() > 0){
-    //    inChar = serial.read();
-    //    serialOut.write(inChar+"\n");      
+    //    iByte = serial.read();
+    //    serialOut.write(iByte+"\n");      
     //}
     return true;
 
@@ -76,10 +71,10 @@ boolean AGPSMessage::readFromSerial(SoftwareSerial &serial){
 
     while (serial.available() > 0){
         
-        inChar = serial.read();
+        iByte = serial.read();
         
-        if(index < maxInputByte || inChar == '\0'){
-            iMsg[index] = inChar;
+        if(index < maxInputByte || iByte == '\0'){
+            iMsg[index] = iByte;
             vRet = true;
         }        
 
@@ -106,18 +101,18 @@ boolean AGPSMessage::readFromSerial(HardwareSerial &serial){
 
     boolean vRet = false;
 
-    while (serial.available() > 0){
-        
-        inChar = serial.read();
-        
-        if(index <= maxInputChar || inChar == '\0'){
-            setCharMsg(index, inChar);            
-            vRet = true;
-        }        
-
-        delay(2);                
-        index++;        
-    }
+    //while (serial.available() > 0){
+    //    
+    //    iByte = serial.read();
+    //    
+    //    if(index <= maxInputChar || iByte == '\0'){
+    //        setCharMsg(index, iByte);            
+    //        vRet = true;
+    //    }        
+//
+    //    delay(2);                
+    //    index++;        
+    //}
     
     return vRet;
 
@@ -131,21 +126,11 @@ boolean AGPSMessage::decodeMsg(){
     index = 0;    
     if(!decodeFirstByte()){
         return false;
-    }
-        
+    }        
     decodeSecondByte();
     decodeThirdFourthBytes();
-    decodeValue();
-
-    //controllo il byte di chiusura        
-    return checkEOM();    
-
-    //Ora bisogna rivedere le funzione getValue
-    //in base al fatto che i valori numerici non
-    //sono più char ma dei binari in dei nibble
-    
-    // rivedere ad esempio getValueInFloat
-    
+    decodeValue();    
+    return checkEOM();            
 
 }
 
@@ -317,59 +302,31 @@ boolean AGPSMessage::checkEOM(){
     
 }
 
-void AGPSMessage::setCharMsg(byte index, char value){
-
-    if(index < sizeof(paramCode))   // <3
-    {            
-        paramCode[index] = value;        
-        paramCode[index+1] = '\0';        
-    }
-
-    if(index == sizeof(paramCode)) // 3
-    {
-        paramValueType = value - '0';        
-    }
-
-    if(index > sizeof(paramCode) && index <= (sizeof(paramCode)+sizeof(paramValue)) ) //<= 13
-    {
-        paramValue[count] = value;
-        paramValue[count+1] = '\0';
-        count++;            
-    }
-
-    if(index == (sizeof(paramCode)+sizeof(paramValue) + 1)) // 14
-    {        
-        paramValueCommaIndex = value - '0';              
-    }
-
-    if(index == (sizeof(paramCode)+sizeof(paramValue) + 2)) // 15
-    {        
-        paramValueIsComplete = value - '0';              
-    }
-
-
-}
-
-unsigned long AGPSMessage::getValueInUL(){
-
-    return strtoul(paramValue,NULL,10);
-    
-}
-
-byte AGPSMessage::getValueInByte(){
-
-    return (byte)strtoul(paramValue,NULL,10);
-
-}
 
 float AGPSMessage::getValueInFloat(){
 
     float vRet = 0.0;
     int cntExp = -paramValueCommaIndex;
+    index = 0;
 
     for(int i = sizeof(paramValue)-1; i >= 0; i--){
-        vRet += (paramValue[i]-'0')*pow(10,cntExp);
+
+        if(!paramValueIsNumeric){
+            vRet += (paramValue[i]-'0')*pow(10,cntExp);
+        }else
+        {
+            index = (paramValue[i] << 4) >> 4;
+            vRet += index*pow(10,cntExp);
+            cntExp++;
+            index = paramValue[i] >> 4;
+            vRet += index*pow(10,cntExp);
+        }
         cntExp++;
+
+    }
+
+    if(paramValueSign == 0){
+        vRet *= -1;
     }
 
     return vRet;

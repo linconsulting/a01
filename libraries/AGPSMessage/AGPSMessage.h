@@ -26,8 +26,6 @@ class AGPSMessage
 {
   public:
     
-    void setCharMsg(byte index, char value);    
-    
     boolean readFromSerial(SoftwareSerial &serial);    
     boolean readFromSerial(HardwareSerial &serial);
     
@@ -35,8 +33,6 @@ class AGPSMessage
 
     boolean rFS(SoftwareSerial &serial, HardwareSerial &serialOut);
 
-    byte getValueInByte();
-    unsigned long getValueInUL();
     float getValueInFloat();
     
     
@@ -52,7 +48,7 @@ class AGPSMessage
     bool paramValueHasPayload;
     byte byteDecoded;
 
-    byte iMsg[10];
+    
 
   private:
     void setDefaultValue();    
@@ -67,11 +63,11 @@ class AGPSMessage
     byte decodeByte();
     byte decodeBits(byte bitFrom, byte bitTo, byte bitSetFrom); 
 
-    char inChar;
-    byte index, count, msgLength;
+    byte iMsg[10];
+    int iByte;
+    byte index, msgLength;
     bool lsbIsNibble;
-    const byte maxInputChar = 16;
-    const byte maxInputByte = 11;
+    const byte maxInputByte = 14;
 };
 
 #endif
