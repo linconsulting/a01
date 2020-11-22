@@ -38,17 +38,23 @@ class AGPSMessage
     bool paramValueHasPayload;
     byte byteDecoded;
 
-
-  private:
-    void setDefaultValue();    
-    void decodeByte();
-    void decodeBits(byte bitFrom, byte bitTo, byte bitSetFrom); 
-
+  protected:
+    
     byte iMsg[10];
     int iByte;
     byte index, msgLength;
     bool lsbIsNibble;
     const byte maxInputByte = 14;
+
+    void setDefaultValue();    
+    void decodeByte();
+    void decodeBits(byte bitFrom=0, byte bitTo=8, byte bitSetFrom = 0); 
+
+  
+    
+    
+
+    
 };
 
 #endif

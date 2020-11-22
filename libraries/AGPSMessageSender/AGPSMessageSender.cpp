@@ -1,6 +1,6 @@
 /*
-AGPSMessage.h - Library for Arduino General Purpose Serial Messaging.
-Created by Giacomo Solazzi, August 9, 2020.
+AGPSMessageSender.h - Library for Arduino General Purpose Serial Messaging.
+Created by Giacomo Solazzi, November 21, 2020.
 Released into the public domain.
 For more information: variable declaration, changelog,... see AGPSMessage.h
 
@@ -21,52 +21,17 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 #include <Arduino.h>
-#include "AGPSMessage.h"
+#include "AGPSMessageSender.h"
 #define parity(b) ((((((b)^(((b)<<4)|((b)>>4))) + 0x41) | 0x7C ) +2 ) & 0x80) //parity logica even: 1 pari 0 dispari
 
 
-void AGPSMessage::setDefaultValue(){
 
-    paramValueType = 255;
-    memset(paramValue, ' ', sizeof(paramValue));  
-    paramValueCommaIndex = 255;
-    paramValueIsComplete = 255;
-
-    index = 0;
-    msgLength = 0;
-    lsbIsNibble = false;
+boolean AGPSMessageSender::sendOK(SoftwareSerial &serial){
     
-}
-
-
-void AGPSMessage::decodeByte(){
-
-    byteDecoded = 0;
+    byte nByteBuff = serial.println(F("E000000000000000"));
     
-    for (byte i = 0; i < 8; i++)
-    {
-        if(bitRead(iMsg[index],i)){
-            bitSet(byteDecoded,i);
-        }        
-        
-    }
-
-
-}
-
-void AGPSMessage::decodeBits(byte bitFrom, byte bitTo, byte bitSetFrom){
-
-    byteDecoded = 0;
-    byte j = bitSetFrom;
+    return (nByteBuff > 0) ? true : false;
     
-    for (byte i = bitFrom; i < bitTo; i++)
-    {
-        if(bitRead(iMsg[index],i)){
-            bitSet(byteDecoded,j);
-        }        
-        j++;
-    }
-
     
 }
 

@@ -1,6 +1,6 @@
 /*
-  AGPSMessageReceiver.h - Library for Arduino General Purpose Serial Messaging.
-  Created by Giacomo Solazzi, November 21, 2020.
+  AGPSMessageSender.h - Library for Arduino General Purpose Serial Messaging.
+  Created by Giacomo Solazzi, November 22, 2020.
   Released into the public domain.
 
   This library is free software; you can redistribute it and/or
@@ -16,33 +16,18 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 */
-#ifndef AGPSMessageReceiver_h
-#define AGPSMessageReceiver_h
+#ifndef AGPSMessageSender_h
+#define AGPSMessageSender_h
 
 #include "Arduino.h"
 #include <SoftwareSerial.h>
 #include <AGPSMessage.h>
 
-class AGPSMessageReceiver : public AGPSMessage
+class AGPSMessageSender : public AGPSMessage
 {
   public:
     
-    boolean readFromSerial(SoftwareSerial &serial);    
-    boolean readFromSerial(HardwareSerial &serial);
-    boolean rFS(SoftwareSerial &serial, HardwareSerial &serialOut);
-    float getValueInFloat();
-    
-
-  private:
-    void setDefaultValue();    
-    void decodeSecondByte();
-    void decodeThirdFourthBytes();
-    void decodeValue();
-    
-    boolean decodeMsg();   
-    boolean decodeFirstByte();
-    boolean checkEOM();   //end of message    
-    
+    boolean sendOK(SoftwareSerial &serial);    
 
     
 };
