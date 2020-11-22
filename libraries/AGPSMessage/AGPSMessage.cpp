@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 void AGPSMessage::setDefaultValue(){
 
     paramValueType = 255;
+    memset(iMsg, 0, sizeof(iMsg));  
     memset(paramValue, ' ', sizeof(paramValue));  
     paramValueCommaIndex = 255;
     paramValueIsComplete = 255;

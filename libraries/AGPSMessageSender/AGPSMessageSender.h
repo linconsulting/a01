@@ -29,6 +29,13 @@ class AGPSMessageSender : public AGPSMessage
     
     boolean sendOK(SoftwareSerial &serial);    
 
+  private:
+
+    void setMessageIsComplete();
+    void setMessageValueIsNumeric();
+    void setMessageValueType();
+    void setMessageValueSign();
+    void setMessageHasPayload();
     
 };
 

@@ -40,7 +40,7 @@ class AGPSMessage
 
   protected:
     
-    byte iMsg[10];
+    byte iMsg[14];
     int iByte;
     byte index, msgLength;
     bool lsbIsNibble;

@@ -28,12 +28,84 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 boolean AGPSMessageSender::sendOK(SoftwareSerial &serial){
     
-    byte nByteBuff = serial.println(F("E000000000000000"));
+    //byte nByteBuff = serial.println(F("E000000000000000"));    
+    //return (nByteBuff > 0) ? true : false;
+    setDefaultValue();
     
-    return (nByteBuff > 0) ? true : false;
-    
+    //inizio codifica primo bit (lsb) del primo byte    
+    bitSet(iMsg[index],0); //start of message
+
+    paramValueIsComplete = true;
+    setMessageIsComplete();
+
+    paramValueIsNumeric = false;
+    setMessageValueIsNumeric();
+
+    paramValueType = 0;
+    setMessageValueType();
+
+    paramValueSign = 1;
+    setMessageValueSign();
+
+    paramValueHasPayload = 0;
+    setMessageHasPayload();
+   
+    //inizio secondo byte...
     
 }
+
+void AGPSMessageSender::setMessageIsComplete(){
+
+    if(!paramValueIsComplete){
+        bitSet(iMsg[index],1); //messaggio incompleto: da accodarne un altro
+    }
+
+}
+
+void AGPSMessageSender::setMessageValueIsNumeric(){
+
+    if(!paramValueIsNumeric){
+        bitSet(iMsg[index],2); //alfanumerico
+    }
+
+}
+
+void AGPSMessageSender::setMessageValueType(){
+
+    switch (paramValueType)
+    {
+        //0 = byte -> lascia tutti i bit spenti
+        case 1:
+            bitSet(iMsg[index],3);
+            break;
+        case 2:
+            bitSet(iMsg[index],4);
+            break;
+        case 3:
+            bitSet(iMsg[index],3);
+            bitSet(iMsg[index],4);
+            break;
+        
+    }
+
+}
+
+void AGPSMessageSender::setMessageValueSign(){
+
+    if(paramValueSign){
+        bitSet(iMsg[index],5); //segno algebrico positivo
+    }
+
+}
+
+void AGPSMessageSender::setMessageHasPayload(){
+
+    if(paramValueHasPayload){
+        bitSet(iMsg[index],6); //se oltre al codice parametro c'è un valore
+    }
+
+}
+
 
 
 
