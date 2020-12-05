@@ -50,9 +50,64 @@ boolean AGPSMessageSender::sendOK(SoftwareSerial &serial){
     paramValueHasPayload = 0;
     setMessageHasPayload();
    
-    //inizio secondo byte...
+    index++;
+    //secondo byte
+    if(paramValueHasPayload){
+        setMessageValueLength();
+        setMessageCommaIndex();
+        index++;
+    }
+
+    setMessageParamCode();
+    
+    // inserire valore ed il byte di chiusura
+
+
+
     
 }
+
+void AGPSMessageSender::setMessageParamCode(){
+
+    byte buffer;
+    iMsg[index] = paramCode << 4;                
+
+    /*
+    Given the number 789 :
+    9 is 789 % 10
+    8 is 789 / 10 % 10
+    7 is 789 / 100 % 10    
+    */
+
+    buffer = paramCodeNumber / 100 % 10;
+    iMsg[index] = iMsg[index] ^ buffer;
+    index++;    
+    
+    buffer = paramCodeNumber / 10 % 10;
+    iMsg[index] = buffer << 4;    
+    buffer = paramCodeNumber % 10;
+    iMsg[index] = iMsg[index] ^ buffer;
+
+
+}
+
+void AGPSMessageSender::setMessageValueLength(){
+
+    if(paramValueHasPayload && paramValueLength){
+        iMsg[index] = paramValueLength << 4;                
+    }
+
+}
+
+void AGPSMessageSender::setMessageCommaIndex(){
+
+    if(paramValueHasPayload){        
+        iMsg[index] = iMsg[index] ^ paramValueCommaIndex;
+    }
+
+}
+
+
 
 void AGPSMessageSender::setMessageIsComplete(){
 

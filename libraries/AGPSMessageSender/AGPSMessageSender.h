@@ -36,6 +36,9 @@ class AGPSMessageSender : public AGPSMessage
     void setMessageValueType();
     void setMessageValueSign();
     void setMessageHasPayload();
+    void setMessageValueLength();
+    void setMessageCommaIndex();
+    void setMessageParamCode();
     
 };
 

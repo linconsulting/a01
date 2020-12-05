@@ -37,6 +37,7 @@ void AGPSMessage::setDefaultValue(){
     msgLength = 0;
     lsbIsNibble = false;
     
+    
 }
 
 
