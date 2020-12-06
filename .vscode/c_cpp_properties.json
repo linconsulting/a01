@@ -13,12 +13,15 @@
                 "C:\\Users\\giacomo.solazzi\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\**",
                 "C:\\Users\\giacomo\\AppData\\Local\\Arduino15\\packages\\arduino\\hardware\\avr\\1.8.3\\**",
                 "C:\\Users\\giacomo\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\**",
-                "${workspaceFolder}/libraries/AGPSMessage"
+                "${workspaceFolder}/libraries/AGPSMessage",
+                "C:\\Program Files (x86)\\Arduino\\hardware\\tools\\**",
+                "C:\\Users\\giacomo\\Documents\\Arduino\\libraries\\**"
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
-                "_UNICODE"
+                "_UNICODE",
+                "USBCON"
             ],
             "intelliSenseMode": "msvc-x64",
             "forcedInclude": [

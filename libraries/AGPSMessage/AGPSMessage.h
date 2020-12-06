@@ -49,9 +49,6 @@ class AGPSMessage
     void setDefaultValue();    
     void decodeByte();
     void decodeBits(byte bitFrom=0, byte bitTo=8, byte bitSetFrom = 0); 
-
-  
-    
     
 
     

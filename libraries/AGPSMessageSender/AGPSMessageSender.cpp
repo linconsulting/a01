@@ -28,8 +28,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 boolean AGPSMessageSender::sendOK(SoftwareSerial &serial){
     
-    //byte nByteBuff = serial.println(F("E000000000000000"));    
-    //return (nByteBuff > 0) ? true : false;
     setDefaultValue();
     
     //inizio codifica primo bit (lsb) del primo byte    
@@ -50,8 +48,7 @@ boolean AGPSMessageSender::sendOK(SoftwareSerial &serial){
     paramValueHasPayload = 0;
     setMessageHasPayload();
    
-    index++;
-    //secondo byte
+    index++;    
     if(paramValueHasPayload){
         setMessageValueLength();
         setMessageCommaIndex();
@@ -59,12 +56,69 @@ boolean AGPSMessageSender::sendOK(SoftwareSerial &serial){
     }
 
     setMessageParamCode();
+
+    index++;
+    if(paramValueHasPayload){
+        setMessageValueAndEOM();
+    }else{
+        iMsg[index]=(byte)1; //End Of Message
+    }
+
     
-    // inserire valore ed il byte di chiusura
+    for (byteDecoded = 0; byteDecoded < maxInputByte; byteDecoded++)
+    {
+        byteDecoded += serial.write(iMsg[byteDecoded]);
+        delay(10);
+    }    
+        
+    return (byteDecoded > 0) ? true : false;
 
-
-
+    //vedere come inviare un valore numerico
+    //cioè come splittare le cifre es 2549.98:
+    //se usare i char dell'array paramValue[i] e convertirli in nibble
+    //o usare uno splitter come in setMessageParamCode()
     
+    
+}
+
+void AGPSMessageSender::setMessageValueAndEOM(){
+
+    if(paramValueIsNumeric){
+
+        for (byte i = 0; i <= paramValueLength - 1; i++)
+        {
+            iMsg[index] = (paramValue[i] - 48) << 4;                            
+            
+            if(i < paramValueLength - 1){
+                iMsg[index] ^= (paramValue[++i] - 48);                
+            }            
+
+            if(i < paramValueLength - 1){
+                index++;
+            }
+            
+        }
+
+        if((paramValueLength*4) % 8 != 0){
+            iMsg[index] ^= (byte)1;
+        }
+        else
+        {
+            iMsg[++index] = (byte)1;
+        }
+
+    }else
+    {
+
+        for (byte i = 0; i < paramValueLength; i++){            
+            iMsg[index++] = paramValue[i];                                        
+        }
+        iMsg[index] = (byte)1;
+
+    }
+
+
+
 }
 
 void AGPSMessageSender::setMessageParamCode(){

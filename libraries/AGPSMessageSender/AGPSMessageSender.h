@@ -39,6 +39,7 @@ class AGPSMessageSender : public AGPSMessage
     void setMessageValueLength();
     void setMessageCommaIndex();
     void setMessageParamCode();
+    void setMessageValueAndEOM();
     
 };
 
