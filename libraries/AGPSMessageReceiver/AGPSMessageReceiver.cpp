@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 #include <Arduino.h>
-#include "AGPSMessageReceiver.h"
+#include <AGPSMessageReceiver.h>
 #define parity(b) ((((((b)^(((b)<<4)|((b)>>4))) + 0x41) | 0x7C ) +2 ) & 0x80) //parity logica even: 1 pari 0 dispari
 
 
@@ -40,11 +40,12 @@ boolean AGPSMessageReceiver::rFS(SoftwareSerial &serial, HardwareSerial &serialO
 }
 
 
-boolean AGPSMessageReceiver::readFromSerial(SoftwareSerial &serial){
+boolean AGPSMessageReceiver::readFromSerial(SoftwareSerial &serial, HardwareSerial &serialOut){
     
+    sOut = &serialOut;
     
     if(serial.available() > 0){
-        setDefaultValue();
+        AGPSMessage::setDefaultValue();        
     }
 
     boolean vRet = false;
@@ -115,7 +116,7 @@ boolean AGPSMessageReceiver::decodeMsg(){
     }        
     decodeSecondByte();
     decodeThirdFourthBytes();
-    decodeValue();    
+    decodeValue();     
     return checkEOM();            
 
 }
@@ -126,6 +127,7 @@ boolean AGPSMessageReceiver::decodeMsg(){
 boolean AGPSMessageReceiver::decodeFirstByte(){
 
     //inizio decodifica primo byte, primo bit (lsb)
+    
     if(bitRead(iMsg[index],0) == 0){
         return false;
     }
@@ -139,7 +141,8 @@ boolean AGPSMessageReceiver::decodeFirstByte(){
     if(bitRead(iMsg[index],2)){
         paramValueIsNumeric = false;        
     }
-
+    
+        
     if(!paramValueIsNumeric){
         paramValueType = 0;
         paramValueSign = 0;
@@ -158,6 +161,7 @@ boolean AGPSMessageReceiver::decodeFirstByte(){
 
     //bit 8 msb nn contiene informazione
     //fine decodifica primo byte
+    return true;
     
 
 }
@@ -165,7 +169,7 @@ boolean AGPSMessageReceiver::decodeFirstByte(){
 void AGPSMessageReceiver::decodeSecondByte(){
     
     index++;
-
+    
     if(paramValueHasPayload){
         decodeBits(0,5);
         if(byteDecoded >= 0 && byteDecoded <= 9){
@@ -186,9 +190,13 @@ void AGPSMessageReceiver::decodeThirdFourthBytes(){
 
     byte bufferByte = 0;
 
-    index++;    
+    if(paramValueLength > 0){
+        index++;    
+    }
+    
     decodeBits();    
     paramCode = byteDecoded;
+
     index++; 
     decodeBits();
     bufferByte = byteDecoded;
@@ -202,7 +210,7 @@ void AGPSMessageReceiver::decodeThirdFourthBytes(){
 
     byteDecoded = bufferByte << 4;
     paramCodeNumber += byteDecoded >> 4; //incremento con terza cifra parametro
-
+    
 }
 
 void AGPSMessageReceiver::decodeValue(){

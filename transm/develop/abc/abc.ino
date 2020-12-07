@@ -1,6 +1,8 @@
 
 #include <SoftwareSerial.h>
 #include <AGPSMessage.h>
+#include <AGPSMessageReceiver.h>
+#include <AGPSMessageSender.h>
 
 #define rxPin 2
 #define txPin 3
@@ -31,7 +33,7 @@ SoftwareSerial btSerial =  SoftwareSerial(rxPin, txPin);
 //char inChar=-1; // Where to store the character read
 //byte index = 0; // Index into array; where to store the character
 
-AGPSMessage exchMsg = AGPSMessage();
+AGPSMessageReceiver exchMsg = AGPSMessageReceiver();
 char x = ' ';
 
 void setup()
@@ -56,118 +58,120 @@ void setup()
 
 }
 
-boolean updateVars(AGPSMessage &msg){
+//boolean updateVars(AGPSMessage &msg){
+//
+//  int strCode = 0;
+//  for(int i = 0; i < sizeof(msg.paramCode); i++){
+//    strCode += msg.paramCode[i];      
+//  }
+//  
+//  switch (strCode) {
+//    case S01:
+//      
+//      Serial.println(msg.getValueInFloat());
+//      //da inviare ad arduino ev controller
+//      
+//      return true;
+//      break;
+//    case G01:
+//      return true;
+//      break;
+//    case S02:
+//      return true;
+//      break;
+//    case G02:
+//      return true;
+//      break;    
+//    case S03:
+//      return true;
+//      break;
+//    case G03:
+//      return true;
+//      break;
+//    case S04:
+//      return true;
+//      break;
+//    case G04:
+//      return true;
+//      break;
+//    case S05:
+//      return true;
+//      break;
+//    case G05:
+//      return true;
+//      break;
+//    case S06:
+//      return true;
+//      break;
+//    case G06:
+//      return true;
+//      break;
+//    case S07:
+//      return true;
+//      break;
+//    case G07:
+//      return true;
+//      break;
+//    case S08:
+//      return true;
+//      break;
+//    case G08:
+//      return true;
+//      break;
+//    default:
+//      return false;
+//      break;
+//  }
+//
+//  return false;
+//
+//}
 
-  int strCode = 0;
-  for(int i = 0; i < sizeof(msg.paramCode); i++){
-    strCode += msg.paramCode[i];      
-  }
-  
-  switch (strCode) {
-    case S01:
-      
-      Serial.println(msg.getValueInFloat());
-      //da inviare ad arduino ev controller
-      
-      return true;
-      break;
-    case G01:
-      return true;
-      break;
-    case S02:
-      return true;
-      break;
-    case G02:
-      return true;
-      break;    
-    case S03:
-      return true;
-      break;
-    case G03:
-      return true;
-      break;
-    case S04:
-      return true;
-      break;
-    case G04:
-      return true;
-      break;
-    case S05:
-      return true;
-      break;
-    case G05:
-      return true;
-      break;
-    case S06:
-      return true;
-      break;
-    case G06:
-      return true;
-      break;
-    case S07:
-      return true;
-      break;
-    case G07:
-      return true;
-      break;
-    case S08:
-      return true;
-      break;
-    case G08:
-      return true;
-      break;
-    default:
-      return false;
-      break;
-  }
-
-  return false;
-
-}
 
 
+//void _loop() // run over and over
+//{      
+//    
+//    if(exchMsg.readFromSerial(btSerial)){
+//      
+//      Serial.write("\n");
+//
+//      for(int i = 0; i < 3; i++){
+//        Serial.write(exchMsg.paramCode[i]);      
+//      }
+//      
+//      Serial.write("\n");      
+//
+//      Serial.write(exchMsg.paramValueType + '0');
+//
+//      Serial.write("\n");      
+//
+//      for(int j = 0; j < 10; j++){        
+//        Serial.write(exchMsg.paramValue[j]);
+//      }
+//
+//      Serial.write("\n");      
+//
+//      Serial.write(exchMsg.paramValueCommaIndex + '0');
+//
+//      Serial.write("\n"); 
+//
+//      Serial.write(exchMsg.paramValueIsComplete + '0');
+//
+//      boolean r = exchMsg.writeOkToSerial(btSerial);
+//
+//      Serial.write(r + '0');
+//
+//      Serial.write("\n"); 
+//
+//      Serial.write(updateVars(exchMsg) + '0');
+//
+//    }
+//
+//    delay(10);
+//
+//  
+//
+//}
 
-void loop() // run over and over
-{      
-    
-    if(exchMsg.readFromSerial(btSerial)){
-      
-      Serial.write("\n");
 
-      for(int i = 0; i < 3; i++){
-        Serial.write(exchMsg.paramCode[i]);      
-      }
-      
-      Serial.write("\n");      
-
-      Serial.write(exchMsg.paramValueType + '0');
-
-      Serial.write("\n");      
-
-      for(int j = 0; j < 10; j++){        
-        Serial.write(exchMsg.paramValue[j]);
-      }
-
-      Serial.write("\n");      
-
-      Serial.write(exchMsg.paramValueCommaIndex + '0');
-
-      Serial.write("\n"); 
-
-      Serial.write(exchMsg.paramValueIsComplete + '0');
-
-      boolean r = exchMsg.writeOkToSerial(btSerial);
-
-      Serial.write(r + '0');
-
-      Serial.write("\n"); 
-
-      Serial.write(updateVars(exchMsg) + '0');
-
-    }
-
-    delay(10);
-
-  
-
-}

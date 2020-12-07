@@ -1,12 +1,13 @@
 #include <SoftwareSerial.h>
 #include <AGPSMessage.h>
+#include <AGPSMessageReceiver.h>
 
 #define rxPin 2
 #define txPin 3
 
 
 SoftwareSerial btSerial =  SoftwareSerial(rxPin, txPin);
-AGPSMessage exchMsg = AGPSMessage();
+AGPSMessageReceiver exchMsg = AGPSMessageReceiver();
 int incomingByte;   
 
 void setup()
@@ -32,32 +33,31 @@ void setup()
 
 
 void loop() // run over and over
-{       
+{      
     
-    //while (btSerial.available() > 0){
-    //    
-    //    incomingByte = btSerial.read();       
-    //    
-    //    // say what you got:
-    //    Serial.print("I received: ");
-    //    Serial.println(incomingByte, DEC);
-    //    Serial.println(incomingByte, BIN);
-    //    
-    //    
-    //    delay(2);                
-    //    
-    //}
-    
-    if(exchMsg.readFromSerial(btSerial)){
+    if(exchMsg.readFromSerial(btSerial, Serial)){
       
-      Serial.write("\n"); 
+      
+      Serial.write("\n");            
+      Serial.println(exchMsg.paramCode,DEC);      
+      Serial.println(exchMsg.paramValueType,DEC);
 
-      Serial.write(exchMsg.paramValueIsComplete + '0');
+      for(int j = 0; j < 9; j++){        
+        Serial.write(exchMsg.paramValue[j]);
+      }
 
-      Serial.write("\n"); 
+      Serial.write("\n");      
+
+      Serial.println(exchMsg.paramValueCommaIndex,DEC);      
+
+      Serial.println(exchMsg.paramValueIsComplete,DEC);
+
+      
+
     }
 
     delay(10);
- 
+
+  
 
 }

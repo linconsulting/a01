@@ -27,7 +27,9 @@ class AGPSMessageReceiver : public AGPSMessage
 {
   public:
     
-    boolean readFromSerial(SoftwareSerial &serial);    
+    HardwareSerial *sOut;
+    
+    boolean readFromSerial(SoftwareSerial &serial, HardwareSerial &serialOut);
     boolean readFromSerial(HardwareSerial &serial);
     boolean rFS(SoftwareSerial &serial, HardwareSerial &serialOut);
     float getValueInFloat();
