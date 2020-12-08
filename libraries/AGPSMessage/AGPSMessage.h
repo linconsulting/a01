@@ -37,10 +37,11 @@ class AGPSMessage
     bool paramValueIsNumeric;
     bool paramValueHasPayload;
     byte byteDecoded;
+    byte iMsg[14];
 
   protected:
     
-    byte iMsg[14];
+    //byte iMsg[14];
     int iByte;
     byte index, msgLength;
     bool lsbIsNibble;

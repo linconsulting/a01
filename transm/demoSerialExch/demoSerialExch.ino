@@ -1,13 +1,16 @@
 #include <SoftwareSerial.h>
 #include <AGPSMessage.h>
 #include <AGPSMessageReceiver.h>
+#include <AGPSMessageSender.h>
 
 #define rxPin 2
 #define txPin 3
 
 
 SoftwareSerial btSerial =  SoftwareSerial(rxPin, txPin);
-AGPSMessageReceiver exchMsg = AGPSMessageReceiver();
+AGPSMessageReceiver iMsg = AGPSMessageReceiver();
+AGPSMessageSender oMsg = AGPSMessageSender();
+
 int incomingByte;   
 
 void setup()
@@ -35,25 +38,43 @@ void setup()
 void loop() // run over and over
 {      
     
-    if(exchMsg.readFromSerial(btSerial, Serial)){
+    if(iMsg.readFromSerial(btSerial, Serial)){
       
       
       Serial.write("\n");            
-      Serial.println(exchMsg.paramCode,DEC);      
-      Serial.println(exchMsg.paramValueType,DEC);
-
-      for(int j = 0; j < 9; j++){        
-        Serial.write(exchMsg.paramValue[j]);
-      }
-
-      Serial.write("\n");      
-
-      Serial.println(exchMsg.paramValueCommaIndex,DEC);      
-
-      Serial.println(exchMsg.paramValueIsComplete,DEC);
-
       
+      switch (iMsg.paramCode)
+      {
+      case 0:
+        Serial.write("G");
+        break;
+      case 1:
+        Serial.write("S");
+        break;
+      case 2:
+        Serial.write("E");
+        break;
+      case 3:
+        Serial.write("W");
+        break;
+      case 4:
+        Serial.write("M");
+        break;
+      }
+      
+      Serial.println(iMsg.paramCodeNumber,DEC);      
+      
+      oMsg.sendOK(btSerial);
 
+      for (byte i = 0; i < 4; i++)
+      {
+        Serial.println(oMsg.iMsg[i],BIN);
+      }
+      
+      
+      
+      
+      
     }
 
     delay(10);

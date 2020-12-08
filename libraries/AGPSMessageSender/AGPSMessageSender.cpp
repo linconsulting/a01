@@ -61,14 +61,14 @@ boolean AGPSMessageSender::sendOK(SoftwareSerial &serial){
     if(paramValueHasPayload){
         setMessageValueAndEOM();
     }else{
-        iMsg[index]=(byte)1; //End Of Message
+        iMsg[index]=(byte)4; //End Of Message
     }
 
     
     for (byteDecoded = 0; byteDecoded < maxInputByte; byteDecoded++)
     {
         byteDecoded += serial.write(iMsg[byteDecoded]);
-        delay(10);
+        delay(2);
     }    
         
     return (byteDecoded > 0) ? true : false;
@@ -100,11 +100,11 @@ void AGPSMessageSender::setMessageValueAndEOM(){
         }
 
         if((paramValueLength*4) % 8 != 0){
-            iMsg[index] ^= (byte)1;
+            iMsg[index] ^= (byte)4;
         }
         else
         {
-            iMsg[++index] = (byte)1;
+            iMsg[++index] = (byte)4;
         }
 
     }else
