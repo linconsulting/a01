@@ -61,17 +61,14 @@ boolean AGPSMessageSender::sendOK(SoftwareSerial &serial){
     if(paramValueHasPayload){
         setMessageValueAndEOM();
     }else{
-        iMsg[index]=(byte)4; //End Of Message
+        iMsg[index]=(byte)4; //End Of Message        
     }
 
+    if(!serial.write(iMsg,maxInputByte)){
+            return false;
+    }
     
-    for (byteDecoded = 0; byteDecoded < maxInputByte; byteDecoded++)
-    {
-        byteDecoded += serial.write(iMsg[byteDecoded]);
-        delay(2);
-    }    
-        
-    return (byteDecoded > 0) ? true : false;
+    return true;
 
     //vedere come inviare un valore numerico
     //cioè come splittare le cifre es 2549.98:

@@ -66,13 +66,10 @@ void loop() // run over and over
       
       oMsg.sendOK(btSerial);
 
-      for (byte i = 0; i < 4; i++)
+      for (byte i = 0; i < 8; i++)
       {
         Serial.println(oMsg.iMsg[i],BIN);
       }
-      
-      
-      
       
       
     }
