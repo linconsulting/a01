@@ -26,6 +26,64 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 
+
+boolean AGPSMessageSender::send123dot45(SoftwareSerial &serial){
+
+    setDefaultValue();
+    //inizio codifica primo bit (lsb) del primo byte    
+    bitSet(iMsg[index],0); //start of message
+
+    paramValueIsComplete = true;
+    setMessageIsComplete();
+
+    paramValueIsNumeric = true;
+    setMessageValueIsNumeric();
+
+    paramValueType = 3; //float
+    setMessageValueType();
+
+    paramValueSign = 1;
+    setMessageValueSign();
+
+    paramValueHasPayload = 1;
+    setMessageHasPayload();
+
+    paramValueLength = 5;
+    paramValueCommaIndex = 2;
+    paramValue[0] = '1';
+    paramValue[1] = '2';
+    paramValue[2] = '3';
+    paramValue[3] = '4';
+    paramValue[4] = '5';
+   
+    index++;    
+    if(paramValueHasPayload){
+        setMessageValueLength();
+        setMessageCommaIndex();
+        index++;
+    }
+
+    paramCode = 0;
+    paramCodeNumber = 1;
+
+    setMessageParamCode();
+
+    index++;
+    if(paramValueHasPayload){
+        setMessageValueAndEOM();
+    }else{
+        iMsg[index]=(byte)4; //End Of Message        
+    }
+
+    if(!serial.write(iMsg,maxInputByte)){
+            return false;
+    }
+    
+    return true;
+
+}
+
+
 boolean AGPSMessageSender::sendOK(SoftwareSerial &serial){
     
     setDefaultValue();

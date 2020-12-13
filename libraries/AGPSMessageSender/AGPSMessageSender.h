@@ -28,6 +28,7 @@ class AGPSMessageSender : public AGPSMessage
   public:
     
     boolean sendOK(SoftwareSerial &serial);    
+    boolean send123dot45(SoftwareSerial &serial);    
 
   private:
 

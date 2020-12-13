@@ -64,9 +64,10 @@ void loop() // run over and over
       
       Serial.println(iMsg.paramCodeNumber,DEC);      
       
-      oMsg.sendOK(btSerial);
+      //oMsg.sendOK(btSerial);
+      oMsg.send123dot45(btSerial);
 
-      for (byte i = 0; i < 8; i++)
+      for (byte i = 0; i < 14; i++)
       {
         Serial.println(oMsg.iMsg[i],BIN);
       }
