@@ -151,7 +151,7 @@ boolean AGPSMessageReceiver::decodeFirstByte(){
         if(byteDecoded >= 0 && byteDecoded <= 3){
             paramValueType = byteDecoded;
         }        
-        paramValueSign = bitRead(iMsg[index],0);        
+        paramValueSign = bitRead(iMsg[index],5);        
     }
     
     paramValueHasPayload = false;
@@ -225,7 +225,7 @@ void AGPSMessageReceiver::decodeValue(){
 
         if(paramValueIsNumeric){
 
-            bufferByte = paramValueLength / 2;
+            bufferByte = paramValueLength % 2;
             
             if(bufferByte != 0){
                 lsbIsNibble = true;
